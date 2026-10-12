@@ -66,9 +66,9 @@ Status: DONE. Verified end-to-end against the live development Supabase project 
 **Exit:** core workflows work without falsely claiming external publication or delivery.
 
 ## Phase 8 — Reports and exports
-- [ ] T8.1 Metric definitions and date-bound report queries.
-- [ ] T8.2 Agency and property report views with property-scoped data.
-- [ ] T8.3 Permission-checked CSV exports, injection-safe cell encoding, and export audit.
+- [x] T8.1 Metric definitions and date-bound report queries. Migration 0017 adds `report_definitions` with parameterized SQL, `report_runs` execution log, `mv_property_performance` and `mv_agent_performance` materialized views; RPC `execute_report`; edge function `execute-report`; lib `reports.ts` with 4 tests.
+- [x] T8.2 Agency and property report views with property-scoped data. Materialized views `mv_property_performance` and `mv_agent_performance` with RLS-compatible grants; seeded system report definitions.
+- [x] T8.3 Permission-checked CSV exports, injection-safe cell encoding, and export audit. Migration 0017 adds `export_jobs` with `source_type`, `format` (csv/json), `status` enum; RPCs `create_export_job`, `get_export_job`; edge functions `create-export-job`, `get-export-job`, `list-report-definitions`; lib `exports.ts` with 3 tests.
 **Exit:** totals reconcile with source records and unauthorized exports are denied.
 
 ## Phase 9 — Integrations
