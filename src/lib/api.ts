@@ -24,7 +24,7 @@ export class ApiError extends Error {
 export async function invokeFunction<TData>(
   client: SupabaseClient,
   name: string,
-  body: Record<string, unknown>,
+  body: object,
 ): Promise<TData> {
   const { data, error } = await client.functions.invoke<TData>(name, { body });
   if (error) {

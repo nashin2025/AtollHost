@@ -11,6 +11,8 @@ import { SignUpPage } from './features/auth/SignUpPage';
 import { FeaturePlaceholder } from './features/FeaturePlaceholder';
 import { OnboardingPage } from './features/onboarding/OnboardingPage';
 import { OverviewPage } from './features/overview/OverviewPage';
+import { PropertiesPage } from './features/properties/PropertiesPage';
+import { ScannerPage } from './features/scanner/ScannerPage';
 import { ToastProvider } from './components/ui/Toast';
 import { paths } from './router';
 
@@ -41,23 +43,11 @@ export function App() {
                 <Route index element={<OverviewPage />} />
                 <Route
                   path={paths.properties}
-                  element={
-                    <FeaturePlaceholder
-                      title="Properties"
-                      description="Property profiles, team assignment, archive workflow, and audit trail."
-                      screenIds={['AG-PROPERTIES', 'AG-PROPERTY-DETAIL', 'AG-PROPERTY-CREATE', 'AG-PROPERTY-EDIT']}
-                    />
-                  }
+                  element={<PropertiesPage />}
                 />
                 <Route
                   path={paths.scanner}
-                  element={
-                    <FeaturePlaceholder
-                      title="Guesthouse Scanner"
-                      description="Scanner runs, findings with source, severity, confidence, and recommended actions."
-                      screenIds={['AG-SCANNER', 'AG-SCANNER-RUN', 'AG-SCANNER-FINDINGS']}
-                    />
-                  }
+                  element={<ScannerPage />}
                 />
                 <Route
                   path={paths.enquiries}

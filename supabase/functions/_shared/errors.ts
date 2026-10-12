@@ -32,6 +32,7 @@ const rpcErrorMap: Record<string, { code: ErrorCode; status: number }> = {
   FORBIDDEN: { code: 'FORBIDDEN', status: 403 },
   NOT_FOUND: { code: 'NOT_FOUND', status: 404 },
   CONFLICT: { code: 'CONFLICT', status: 409 },
+  RATE_LIMITED: { code: 'RATE_LIMITED', status: 429 },
 };
 
 export function isRpcErrorCode(prefix: string): boolean {

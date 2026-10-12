@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Dialog } from '../components/ui/Dialog';
-import { Field } from '../components/ui/Field';
+import { Field, SelectField } from '../components/ui/Field';
 
 describe('Button', () => {
   it('disables itself while loading', () => {
@@ -49,5 +49,28 @@ describe('Field', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(
       'Enter a valid email',
     );
+  });
+});
+
+describe('SelectField', () => {
+  it('links the label and options', () => {
+    render(
+      <SelectField label="Status" value="active" onChange={() => {}}>
+        <option value="active">Active</option>
+        <option value="paused">Paused</option>
+      </SelectField>,
+    );
+    const select = screen.getByLabelText(/status.*\(required\)/i);
+    expect(select).toHaveValue('active');
+    expect(screen.getByText('Paused')).toBeInTheDocument();
+  });
+
+  it('marks optional selects as optional', () => {
+    render(
+      <SelectField label="Atoll" optional value="" onChange={() => {}}>
+        <option value="">None</option>
+      </SelectField>,
+    );
+    expect(screen.getByLabelText(/atoll.*\(optional\)/i)).toBeInTheDocument();
   });
 });
