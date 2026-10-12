@@ -3,26 +3,28 @@
 Use this as a tracked backlog. Mark tasks only when acceptance criteria and tests are complete. Recommended status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`. Do not mark integration tasks done based on UI mocks.
 
 ## Phase 0 — Repository audit and decisions
-- [ ] T0.1 Inspect repo, scripts, dependencies, routes, migrations, existing tests, and current git diff.
-- [ ] T0.2 Compare current code to all documentation; list gaps and unsafe areas.
+- [x] T0.1 Inspect repo, scripts, dependencies, routes, migrations, existing tests, and current git diff.
+- [x] T0.2 Compare current code to all documentation; list gaps and unsafe areas.
 - [ ] T0.3 Record decisions for hosting region, email, AI provider, data retention, first pilot channel, and support owner.
 - [ ] T0.4 Confirm deployment environments and separate Supabase projects for development/staging/production.
 **Exit:** baseline report; no destructive edits; open decisions documented.
 
 ## Phase 1 — Foundation and design system
-- [ ] T1.1 Establish typed routes, app shell, error boundary, and protected routes.
-- [ ] T1.2 Implement tokens, typography, spacing, color, responsive sidebar/topbar, forms, table, dialog, toast, badges, and empty/loading/error states.
-- [ ] T1.3 Implement keyboard navigation, focus handling, labels, reduced-motion behavior, and mobile layouts.
-- [ ] T1.4 Add lint, typecheck, unit, and build scripts; CI checks.
+Status: scaffold complete, local checks green (lint, typecheck, 6 unit tests, build, dev-server smoke). GitHub CI runs on next push.
+- [x] T1.1 Establish typed routes, app shell, error boundary, and protected routes.
+- [x] T1.2 Implement tokens, typography, spacing, color, responsive sidebar/topbar, forms, table, dialog, toast, badges, and empty/loading/error states.
+- [x] T1.3 Implement keyboard navigation, focus handling, labels, reduced-motion behavior, and mobile layouts.
+- [x] T1.4 Add lint, typecheck, unit, and build scripts; CI checks.
 **Exit:** app boots from clean install; accessibility smoke checks and CI pass.
 
 ## Phase 2 — Identity, organization, and tenant isolation
-- [ ] T2.1 Supabase Auth flows and profile lifecycle.
-- [ ] T2.2 Organization creation and membership/invitation lifecycle.
-- [ ] T2.3 Property assignments and role/permission model.
-- [ ] T2.4 Migrations, foreign keys, uniqueness constraints, indexes, RLS policies, and least-privilege grants.
-- [ ] T2.5 Automated cross-tenant and cross-property tests for every protected table and storage bucket.
-**Exit:** unauthenticated and unauthorized requests denied at database/server level; invitation revocation works.
+Status: implementation written and verified against local PostgreSQL 17 (Docker). Migrations 0001-0007 apply cleanly and all 14 RLS assertions in `supabase/tests/rls_cross_tenant_checks.sql` pass. The development Supabase project (`tqoxfehfhdtzunzyqvci`) was removed externally after migration 0007 was applied, so live Supabase Auth and edge-function verification is blocked until a replacement project is provisioned (see T0.3/T0.4). All artifacts are portable and re-runnable.
+- [ ] T2.1 Supabase Auth flows and profile lifecycle. **Written:** sign in, sign up, forgot/reset password, sign out, session guard (`src/features/auth/*`, `src/components/ProtectedRoute.tsx`, `src/components/AppShell.tsx`). Not yet exercised against a live Auth project.
+- [ ] T2.2 Organization creation and membership/invitation lifecycle. **Written:** migration 0007 (lifecycle columns, `organization_invitations`, SECURITY DEFINER procedures with actor verification) plus edge functions `create-organization`, `invite-member`, `accept-invitation`, `revoke-membership` (`supabase/functions/`) and onboarding/invitation UI (`src/features/onboarding/OnboardingPage.tsx`, `src/features/auth/AcceptInvitationPage.tsx`).
+- [ ] T2.3 Property assignments and role/permission model. **Written:** migration 0007 role helpers (`is_org_admin`, `is_org_staff`, `is_org_member`, `is_property_member`, `is_property_admin`) and `assign-property-member` / `revoke-property-member` edge functions.
+- [ ] T2.4 Migrations, foreign keys, uniqueness constraints, indexes, RLS policies, and least-privilege grants. **Written:** migrations 0001-0007. Migration 0007 closes the cross-tenant read leak, the membership self-insert escalation, and client-side org creation, and adds actor-id verification to every privileged procedure. Must be re-applied and verified on a new project.
+- [ ] T2.5 Automated cross-tenant and cross-property tests for every protected table and storage bucket. **Written:** `supabase/tests/rls_cross_tenant_checks.sql` (14 assertions: cross-tenant denial, cross-property denial, privilege-escalation fixes, actor spoofing, invitation email binding and single use, revocation, self-revocation). **Verified locally:** all 14 pass on PostgreSQL 17 with migrations 0001-0007 applied; re-run after any RLS change.
+**Exit:** unauthenticated and unauthorized requests denied at database/server level; invitation revocation works. **Blocked on:** replacement Supabase project (owner decision, T0.3/T0.4).
 
 ## Phase 3 — Properties and Guesthouse Scanner
 - [ ] T3.1 Property create/edit/archive, team assignment, and audit events.

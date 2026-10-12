@@ -1,0 +1,17 @@
+create index idx_org_members_user on public.organization_members(user_id);
+create index idx_properties_org on public.properties(organization_id);
+create index idx_property_users_user on public.property_users(user_id);
+create index idx_rooms_property on public.rooms(property_id);
+create index idx_guests_org on public.guests(organization_id);
+create index idx_reservations_property_dates on public.reservations(property_id,check_in,check_out);
+create index idx_enquiries_property_status on public.enquiries(property_id,status,created_at desc);
+create index idx_conversations_property on public.conversations(property_id,updated_at desc);
+create index idx_messages_conversation on public.conversation_messages(conversation_id,created_at);
+create index idx_knowledge_property on public.knowledge_items(property_id,active,verified);
+create index idx_tasks_property_status on public.tasks(property_id,status,due_at);
+create index idx_reviews_property_status on public.reviews(property_id,status,created_at desc);
+create index idx_audits_org on public.digital_audits(organization_id,created_at desc);
+create index idx_integrations_org on public.integrations(organization_id);
+create index idx_journey_property on public.guest_journey_events(property_id,scheduled_for,status);
+create index idx_notifications_user on public.notifications(user_id,read_at,created_at desc);
+create index idx_audit_logs_org on public.audit_logs(organization_id,created_at desc);

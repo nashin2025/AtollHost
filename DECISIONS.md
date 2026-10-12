@@ -39,6 +39,12 @@ Record material decisions here using: **ID, date, status, context, decision, con
 - **Decision:** Repository source and product documentation are proprietary by default; no open-source license is granted by the `LICENSE` file.
 - **Consequence:** Do not add third-party assets/dependencies without recording and complying with their licenses.
 
+### ADR-008 — Phase 1 foundation implementation
+- **Status:** Accepted
+- **Decision:** Single-package Vite + React 18 + TypeScript app at the repository root, React Router with a typed route map, plain CSS with the `UI_SPEC.md` token values, Supabase client created only when `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are present, Vitest + Testing Library for tests, ESLint 9 flat config, GitHub Actions CI running lint, typecheck, test, and build.
+- **Consequence:** All navigation routes exist with honest placeholder states; sign-in shows a configuration notice until Supabase credentials are provided. Deferred: PWA manifest and service worker, component library integration, and all feature modules (Phases 2–11).
+
+
 ## Decisions required before production
 
 | ID | Question | Why it matters | Required outcome |
