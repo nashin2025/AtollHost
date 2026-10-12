@@ -1,0 +1,25 @@
+export const paths = {
+  signIn: '/sign-in',
+  signUp: '/sign-up',
+  forgotPassword: '/forgot-password',
+  resetPassword: '/reset-password',
+  acceptInvitation: '/invite',
+  onboarding: '/onboarding',
+  accessDenied: '/access-denied',
+  overview: '/',
+  properties: '/properties',
+  scanner: '/scanner',
+  enquiries: '/enquiries',
+  inbox: '/inbox',
+  brain: '/brain',
+  tasks: '/tasks',
+  journey: '/journey',
+  reviews: '/reviews',
+  content: '/content',
+  reports: '/reports',
+  integrations: '/integrations',
+  team: '/team',
+  settings: '/settings',
+} as const;
+
+export type AppPath = (typeof paths)[keyof typeof paths];
