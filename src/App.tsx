@@ -8,6 +8,7 @@ import { ForgotPasswordPage } from './features/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from './features/auth/ResetPasswordPage';
 import { SignInPage } from './features/auth/SignInPage';
 import { SignUpPage } from './features/auth/SignUpPage';
+import { BrainPage } from './features/brain/BrainPage';
 import { FeaturePlaceholder } from './features/FeaturePlaceholder';
 import { OnboardingPage } from './features/onboarding/OnboardingPage';
 import { OverviewPage } from './features/overview/OverviewPage';
@@ -71,13 +72,7 @@ export function App() {
                 />
                 <Route
                   path={paths.brain}
-                  element={
-                    <FeaturePlaceholder
-                      title="Property Brain"
-                      description="Versioned, verified knowledge facts grounded per property with review workflow."
-                      screenIds={['AG-BRAIN', 'AG-KNOWLEDGE-ITEM']}
-                    />
-                  }
+                  element={<BrainPage />}
                 />
                 <Route
                   path={paths.tasks}

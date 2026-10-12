@@ -35,11 +35,12 @@ Status: DONE. Verified end-to-end against the live development Supabase project 
 **Exit:** scanner can produce reviewed findings without silently changing approved property facts. **Verified live.**
 
 ## Phase 4 — Property Brain
-- [ ] T4.1 Knowledge categories, versioned facts, sources, status, reviewer, and expiry.
-- [ ] T4.2 Review/approve/reject/edit workflow and audit trail.
-- [ ] T4.3 Search/filter and property-scoped retrieval service.
-- [ ] T4.4 Tests proving draft retrieval excludes draft/rejected/expired facts.
-**Exit:** only verified current facts are eligible for guest-facing AI context.
+Status: DONE. Verified end-to-end against the live development Supabase project `whxwazgficyfrpmiqiji`: fact create as draft v1, member RLS read, approval makes the fact retrievable, edit-as-new-version supersedes v1 and removes it from retrieval until the new draft is approved, expiry and rejection exclude facts, future expiry dates are included while unexpired, empty-title validation (400), unauthenticated calls (401), cross-tenant write and retrieval denied (403/FORBIDDEN), and knowledge.created/versioned/reviewed audit events with metadata. Migration 0012 applied live; all assertions in `supabase/tests/rls_cross_tenant_checks.sql` (now 60, including the Phase 4 additions) pass on PostgreSQL 17. Edge functions `upsert-knowledge` and `review-knowledge` deployed and exercised live.
+- [x] T4.1 Knowledge categories, versioned facts, sources, status, reviewer, and expiry. **Verified live:** migration 0012 adds `knowledge_status` (draft/pending_review/approved/rejected/expired), `fact_key`, `version`, `superseded_by`, `expires_at`, `reviewed_by`, `reviewed_at` on `knowledge_items`, a unique constraint on (property_id, fact_key, version), and the `upsert_knowledge_fact` RPC (organization admins, or property_owner/property_manager of the property; every new version starts as draft). `src/lib/knowledge.ts` and the Property Brain page (`src/features/brain/BrainPage.tsx`, routed at `/brain`).
+- [x] T4.2 Review/approve/reject/edit workflow and audit trail. **Verified live:** `review_knowledge_fact` records reviewer and timestamp, writes `knowledge.reviewed` audit events; `upsert_knowledge_fact` writes `knowledge.created` and `knowledge.versioned` events with fact_key, version, and title metadata.
+- [x] T4.3 Search/filter and property-scoped retrieval service. **Verified live:** `retrieve_knowledge_facts` returns only current (non-superseded, approved, non-expired) facts, callable by property members or the service role; the Brain page filters by property, status, and text search, and shows the verified-facts panel.
+- [x] T4.4 Tests proving draft retrieval excludes draft/rejected/expired facts. **Verified live and locally:** `supabase/tests/rls_cross_tenant_checks.sql` asserts retrieval excludes draft, rejected, expired-status, time-expired, and superseded rows and returns exactly the current approved fact; `src/test/brain.test.ts` covers the knowledge data layer (8 unit tests; 31 total green).
+**Exit:** only verified current facts are eligible for guest-facing AI context. **Verified live.**
 
 ## Phase 5 — Enquiries and inbox
 - [ ] T5.1 Enquiry create/import, classification, assignment, status, follow-up, and outcome.
