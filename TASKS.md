@@ -59,10 +59,10 @@ Status: DONE. Verified end-to-end against the live development Supabase project 
 **Exit:** no AI guest message can send without an authorized human approval in MVP.
 
 ## Phase 7 — Tasks, guest journey, reviews, content
-- [ ] T7.1 Task assignment, comments, due dates, reminders, completion, and overdue state.
-- [ ] T7.2 Guest journey event timeline; automations default off until configured and approved.
-- [ ] T7.3 Review tracking and response draft approval.
-- [ ] T7.4 Content calendar and honest manual-vs-integration publication states.
+- [x] T7.1 Task assignment, comments, due dates, reminders, completion, and overdue state. Migration 0015 adds `task_comments`, `task_reminders`, columns on `tasks`; RPCs `create_task`, `update_task`; edge functions `create-task`, `update-task`; lib `tasks.ts` with 6 tests.
+- [x] T7.2 Guest journey event timeline; automations default off until configured and approved. Migration 0015 adds `journey_templates`; RPC `create_journey_template`; edge function `create-journey-template`; lib `journeyTemplates.ts` with 4 tests.
+- [x] T7.3 Review tracking and response draft approval. Migration 0015 adds `review_responses`; RPC `create_review_response`; edge function `create-review-response`; lib `reviewResponses.ts` with 4 tests.
+- [x] T7.4 Content calendar and honest manual-vs-integration publication states. Migration 0015 adds `content_calendar` with `source` enum (manual/integration); RPC `create_content`; edge function `create-content`; lib `content.ts` with 4 tests.
 **Exit:** core workflows work without falsely claiming external publication or delivery.
 
 ## Phase 8 — Reports and exports
