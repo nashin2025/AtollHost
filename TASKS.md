@@ -43,11 +43,11 @@ Status: DONE. Verified end-to-end against the live development Supabase project 
 **Exit:** only verified current facts are eligible for guest-facing AI context. **Verified live.**
 
 ## Phase 5 — Enquiries and inbox
-- [ ] T5.1 Enquiry create/import, classification, assignment, status, follow-up, and outcome.
-- [ ] T5.2 Conversation/message timeline with safe attachment metadata handling.
-- [ ] T5.3 Search, filters, unread/urgent indicators, and mobile inbox.
-- [ ] T5.4 Human takeover, automation pause, explicit handback, and audit events.
-**Exit:** manual enquiry-to-resolution journey works and takeover reliably stops automation.
+- [x] T5.1 Enquiry create/import, classification, assignment, status, follow-up, and outcome. **Verified live:** migration 0013 adds source/topic/follow_up_at/outcome/external_id/unread/urgent plus `enquiry_transition_allowed`; `upsert_enquiry` creates with channel, source allowlist, topic, assignment, and urgent flag; `update_enquiry_status` enforces the transition map (live: new→open accepted, open→new rejected 400, past follow_up_at rejected 400).
+- [x] T5.2 Conversation/message timeline with safe attachment metadata handling. **Verified live:** `start_conversation` links a conversation to an enquiry, `send_message` records human messages, `add_message_attachment` enforces the mime allowlist, 25 MB size bound, and 64-hex SHA-256 checksum with scan_status=pending; the timeline and attachment list render through member RLS.
+- [x] T5.3 Search, filters, unread/urgent indicators, and mobile inbox. **Verified live:** the Enquiries page filters by property, text search, status, and unread-only with urgent badges; the Inbox page shows conversation state (human takeover, automation paused) in a stacked mobile layout; `mark_enquiry_read` flips unread to false (live-verified).
+- [x] T5.4 Human takeover, automation pause, explicit handback, and audit events. **Verified live:** `takeover_conversation` sets human_takeover and automation_paused and writes a system message; a second takeover is rejected 409; `handback_conversation` clears both flags and resumes automation; a second handback is rejected 409; audit logs show enquiry.created, enquiry.status_changed, conversation.created, message.sent, attachment.added, conversation.takeover, and conversation.handback.
+**Exit:** manual enquiry-to-resolution journey works and takeover reliably stops automation. **Verified live.**
 
 ## Phase 6 — AI draft and approval pipeline
 - [ ] T6.1 Server-side provider adapter and timeout/rate-limit/error handling.

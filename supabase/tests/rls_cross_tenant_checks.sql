@@ -99,6 +99,24 @@ insert into public.knowledge_categories(id, property_id, name) values
 insert into public.knowledge_items(property_id, category_id, title, content, source, fact_key, version, status, expires_at) values
   ('a1111111-0000-4000-8000-aaaaaaaaaaaa', 'aa111111-0000-4000-8000-000000000001', 'Time-expired fact', 'Expired content.', 'manual', 'time-expired-fact-key', 1, 'approved', now() - interval '1 day');
 
+-- Phase 5 fixtures: enquiries on each property, a
+-- conversation with an opening guest message, and a
+-- safe attachment metadata row. prop_c gets an enquiry
+-- so cross-property denial checks have a target.
+insert into public.enquiries(id, property_id, channel, source, topic, subject, status, external_id) values
+  ('e1111111-0000-4000-8000-000000000001', 'a1111111-0000-4000-8000-aaaaaaaaaaaa', 'website', 'website', 'booking', 'Transfer question', 'new', 'ext-a-001'),
+  ('c3333333-0000-4000-8000-000000000001', 'a1111111-0000-4000-8000-cccccccccccc', 'email', 'email', 'pricing', 'Weekly rate', 'new', 'ext-c-001'),
+  ('b1111111-0000-4000-8000-000000000001', 'b2222222-0000-4000-8000-bbbbbbbbbbbb', 'email', 'email', 'pricing', 'Rate question', 'new', 'ext-b-001');
+
+insert into public.conversations(id, property_id, enquiry_id, channel, external_thread_id) values
+  ('c1111111-0000-4000-8000-000000000001', 'a1111111-0000-4000-8000-aaaaaaaaaaaa', 'e1111111-0000-4000-8000-000000000001', 'website', 'thread-a-001');
+
+insert into public.conversation_messages(id, conversation_id, role, body) values
+  ('d1111111-0000-4000-8000-000000000001', 'c1111111-0000-4000-8000-000000000001', 'guest', 'Do you offer airport transfer?');
+
+insert into public.message_attachments(message_id, storage_path, mime_type, size_bytes, checksum) values
+  ('d1111111-0000-4000-8000-000000000001', 'attachments/a1/menu.pdf', 'application/pdf', 2048, 'b' || repeat('1', 63));
+
 -- ---------------------------------------------------------------------------
 -- Checks. From here on every statement runs as the authenticated role
 -- with the impersonated user's claims.
@@ -1070,6 +1088,519 @@ begin
       end if;
   end;
   raise notice 'PASS: direct knowledge_items insert denied at the RLS level';
+end $$;
+
+-- ---------------------------------------------------------------------------
+-- Phase 5: Enquiries and inbox
+-- ---------------------------------------------------------------------------
+
+-- Member read: owner_a reads the prop_a enquiry, conversation,
+-- timeline, and attachment metadata.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"sub":"a1111111-0000-4000-8000-000000000002","role":"authenticated"}', true);
+  if (select count(*) from public.enquiries where id = 'e1111111-0000-4000-8000-000000000001') <> 1 then
+    raise exception 'FAIL: owner_a cannot read the property enquiry';
+  end if;
+  if (select count(*) from public.conversations where id = 'c1111111-0000-4000-8000-000000000001') <> 1 then
+    raise exception 'FAIL: owner_a cannot read the property conversation';
+  end if;
+  if (select count(*) from public.conversation_messages where id = 'd1111111-0000-4000-8000-000000000001') <> 1 then
+    raise exception 'FAIL: owner_a cannot read the conversation timeline';
+  end if;
+  if (select count(*) from public.message_attachments where message_id = 'd1111111-0000-4000-8000-000000000001') <> 1 then
+    raise exception 'FAIL: owner_a cannot read attachment metadata';
+  end if;
+  raise notice 'PASS: property member reads enquiries, conversations, timeline, and attachments';
+end $$;
+
+-- Cross-tenant: admin_a sees no org_b enquiry data.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"sub":"a1111111-0000-4000-8000-000000000001","role":"authenticated"}', true);
+  if (select count(*) from public.enquiries where id = 'b1111111-0000-4000-8000-000000000001') <> 0 then
+    raise exception 'FAIL: cross-tenant enquiry read allowed';
+  end if;
+  if (select count(*) from public.conversations where property_id = 'b2222222-0000-4000-8000-bbbbbbbbbbbb') <> 0 then
+    raise exception 'FAIL: cross-tenant conversation read allowed';
+  end if;
+  raise notice 'PASS: cross-tenant enquiry data denied';
+end $$;
+
+-- Cross-property: owner_a is not assigned to prop_c, so the
+-- prop_c enquiry is invisible.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"sub":"a1111111-0000-4000-8000-000000000002","role":"authenticated"}', true);
+  if (select count(*) from public.enquiries where id = 'c3333333-0000-4000-8000-000000000001') <> 0 then
+    raise exception 'FAIL: cross-property enquiry read allowed';
+  end if;
+  raise notice 'PASS: cross-property enquiry read denied';
+end $$;
+
+-- RLS: direct authenticated writes are denied. Enquiry and
+-- conversation writes run through the lifecycle RPCs.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"sub":"a1111111-0000-4000-8000-000000000002","role":"authenticated"}', true);
+  begin
+    insert into public.enquiries(property_id, channel) values ('a1111111-0000-4000-8000-aaaaaaaaaaaa', 'website');
+    raise exception 'FAIL: direct enquiry insert was allowed';
+  exception
+    when others then
+      if SQLERRM not like '%row-level security%' then
+        raise exception 'FAIL: unexpected error: %', SQLERRM;
+      end if;
+  end;
+  begin
+    insert into public.conversation_messages(conversation_id, role, body)
+      values ('c1111111-0000-4000-8000-000000000001', 'human', 'Rogue message');
+    raise exception 'FAIL: direct message insert was allowed';
+  exception
+    when others then
+      if SQLERRM not like '%row-level security%' then
+        raise exception 'FAIL: unexpected error: %', SQLERRM;
+      end if;
+  end;
+  begin
+    insert into public.message_attachments(message_id, storage_path, mime_type, size_bytes)
+      values ('d1111111-0000-4000-8000-000000000001', 'rogue.pdf', 'application/pdf', 10);
+    raise exception 'FAIL: direct attachment insert was allowed';
+  exception
+    when others then
+      if SQLERRM not like '%row-level security%' then
+        raise exception 'FAIL: unexpected error: %', SQLERRM;
+      end if;
+  end;
+  raise notice 'PASS: direct enquiry, message, and attachment writes denied at the RLS level';
+end $$;
+
+-- Service path: agency_admin creates an enquiry.
+do $$
+declare
+  v_enquiry_id uuid;
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  v_enquiry_id := public.upsert_enquiry(null, 'a1111111-0000-4000-8000-111111111111', 'a1111111-0000-4000-8000-aaaaaaaaaaaa', null, null, 'website', 'website', 'booking', 'Transfer request', null, null, false, 'ext-a-002', 'a1111111-0000-4000-8000-000000000001');
+  -- Verify through RLS as the admin user: the write happened
+  -- under the service role, the read runs with the user's own claims.
+  perform set_config('request.jwt.claims', '{"sub":"a1111111-0000-4000-8000-000000000001","role":"authenticated"}', true);
+  if (select count(*) from public.enquiries where id = v_enquiry_id and unread = true and status = 'new') <> 1 then
+    raise exception 'FAIL: service-path enquiry creation did not persist as unread and new';
+  end if;
+  if (select count(*) from public.audit_logs where action = 'enquiry.created' and entity_id = v_enquiry_id) <> 1 then
+    raise exception 'FAIL: enquiry.created audit event was not recorded';
+  end if;
+  raise notice 'PASS: service-role admin creates an enquiry';
+end $$;
+
+-- Service path: property_owner creates an enquiry.
+do $$
+declare
+  v_enquiry_id uuid;
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  v_enquiry_id := public.upsert_enquiry(null, 'a1111111-0000-4000-8000-111111111111', 'a1111111-0000-4000-8000-aaaaaaaaaaaa', null, null, 'email', 'email', 'pricing', 'Rate question', null, null, false, 'ext-a-003', 'a1111111-0000-4000-8000-000000000002');
+  if v_enquiry_id is null then
+    raise exception 'FAIL: property_owner enquiry creation returned no id';
+  end if;
+  raise notice 'PASS: service-role property owner creates an enquiry';
+end $$;
+
+-- Service path: agency_staff cannot manage enquiries.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  begin
+    perform public.upsert_enquiry(null, 'a1111111-0000-4000-8000-111111111111', 'a1111111-0000-4000-8000-aaaaaaaaaaaa', null, null, 'website', 'website', 'booking', 'Rogue enquiry', null, null, false, 'ext-a-rogue', 'a1111111-0000-4000-8000-000000000003');
+    raise exception 'FAIL: agency_staff created an enquiry';
+  exception
+    when others then
+      if SQLERRM not like 'FORBIDDEN:%' then
+        raise exception 'FAIL: unexpected error: %', SQLERRM;
+      end if;
+  end;
+  raise notice 'PASS: agency_staff cannot create enquiries';
+end $$;
+
+-- Service path: cross-tenant admin cannot create enquiries.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  begin
+    perform public.upsert_enquiry(null, 'a1111111-0000-4000-8000-111111111111', 'a1111111-0000-4000-8000-aaaaaaaaaaaa', null, null, 'website', 'website', 'booking', 'Rogue enquiry', null, null, false, 'ext-a-rogue2', 'b2222222-0000-4000-8000-000000000001');
+    raise exception 'FAIL: cross-tenant admin created an enquiry';
+  exception
+    when others then
+      if SQLERRM not like 'FORBIDDEN:%' then
+        raise exception 'FAIL: unexpected error: %', SQLERRM;
+      end if;
+  end;
+  raise notice 'PASS: cross-tenant enquiry write denied';
+end $$;
+
+-- Actor spoofing: owner_a passing admin_a as the actor is
+-- rejected when the RPC is called directly through PostgREST.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"sub":"a1111111-0000-4000-8000-000000000002","role":"authenticated"}', true);
+  begin
+    perform public.upsert_enquiry(null, 'a1111111-0000-4000-8000-111111111111', 'a1111111-0000-4000-8000-aaaaaaaaaaaa', null, null, 'website', 'website', 'booking', 'Rogue enquiry', null, null, false, 'ext-a-rogue3', 'a1111111-0000-4000-8000-000000000001');
+    raise exception 'FAIL: spoofed actor id was accepted';
+  exception
+    when others then
+      if SQLERRM not like 'FORBIDDEN:%' then
+        raise exception 'FAIL: unexpected error: %', SQLERRM;
+      end if;
+  end;
+  raise notice 'PASS: enquiry upsert actor spoofing rejected';
+end $$;
+
+-- Validation: channel is required.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  begin
+    perform public.upsert_enquiry(null, 'a1111111-0000-4000-8000-111111111111', 'a1111111-0000-4000-8000-aaaaaaaaaaaa', null, null, '', 'website', 'booking', 'No channel', null, null, false, null, 'a1111111-0000-4000-8000-000000000001');
+    raise exception 'FAIL: empty channel was accepted';
+  exception
+    when others then
+      if SQLERRM not like 'VALIDATION_ERROR:%' then
+        raise exception 'FAIL: unexpected error: %', SQLERRM;
+      end if;
+  end;
+  raise notice 'PASS: empty enquiry channel rejected';
+end $$;
+
+-- Validation: source must be in the allowlist.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  begin
+    perform public.upsert_enquiry(null, 'a1111111-0000-4000-8000-111111111111', 'a1111111-0000-4000-8000-aaaaaaaaaaaa', null, null, 'website', 'carrier_pigeon', 'booking', 'Odd source', null, null, false, null, 'a1111111-0000-4000-8000-000000000001');
+    raise exception 'FAIL: unknown source was accepted';
+  exception
+    when others then
+      if SQLERRM not like 'VALIDATION_ERROR:%' then
+        raise exception 'FAIL: unexpected error: %', SQLERRM;
+      end if;
+  end;
+  raise notice 'PASS: unknown enquiry source rejected';
+end $$;
+
+-- Validation: a follow-up in the past is rejected.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  begin
+    perform public.upsert_enquiry(null, 'a1111111-0000-4000-8000-111111111111', 'a1111111-0000-4000-8000-aaaaaaaaaaaa', null, null, 'website', 'website', 'booking', 'Stale follow-up', null, now() - interval '1 day', false, null, 'a1111111-0000-4000-8000-000000000001');
+    raise exception 'FAIL: past follow_up_at was accepted';
+  exception
+    when others then
+      if SQLERRM not like 'VALIDATION_ERROR:%' then
+        raise exception 'FAIL: unexpected error: %', SQLERRM;
+      end if;
+  end;
+  raise notice 'PASS: past enquiry follow-up rejected';
+end $$;
+
+-- Validation: duplicate external references deduplicate imports.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  begin
+    perform public.upsert_enquiry(null, 'a1111111-0000-4000-8000-111111111111', 'a1111111-0000-4000-8000-aaaaaaaaaaaa', null, null, 'website', 'website', 'booking', 'Duplicate import', null, null, false, 'ext-a-001', 'a1111111-0000-4000-8000-000000000001');
+    raise exception 'FAIL: duplicate external reference was accepted';
+  exception
+    when others then
+      if SQLERRM not like 'CONFLICT:%' then
+        raise exception 'FAIL: unexpected error: %', SQLERRM;
+      end if;
+  end;
+  raise notice 'PASS: duplicate enquiry external reference rejected';
+end $$;
+
+-- Status transition: invalid transitions are rejected.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  begin
+    perform public.update_enquiry_status('e1111111-0000-4000-8000-000000000001', 'won', null, null, 'a1111111-0000-4000-8000-000000000001');
+    raise exception 'FAIL: invalid status transition was accepted';
+  exception
+    when others then
+      if SQLERRM not like 'VALIDATION_ERROR:%' then
+        raise exception 'FAIL: unexpected error: %', SQLERRM;
+      end if;
+  end;
+  raise notice 'PASS: invalid enquiry transition rejected';
+end $$;
+
+-- Status transition: new to open records the outcome, the
+-- follow-up, and an audit event with the from/to states.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  perform public.update_enquiry_status('e1111111-0000-4000-8000-000000000001', 'open', 'qualified', now() + interval '1 day', 'a1111111-0000-4000-8000-000000000001');
+  perform set_config('request.jwt.claims', '{"sub":"a1111111-0000-4000-8000-000000000001","role":"authenticated"}', true);
+  if (select status from public.enquiries where id = 'e1111111-0000-4000-8000-000000000001') <> 'open' then
+    raise exception 'FAIL: enquiry status update did not persist';
+  end if;
+  if (select outcome from public.enquiries where id = 'e1111111-0000-4000-8000-000000000001') <> 'qualified' then
+    raise exception 'FAIL: enquiry outcome did not persist';
+  end if;
+  if (select count(*) from public.audit_logs where action = 'enquiry.status_changed' and entity_id = 'e1111111-0000-4000-8000-000000000001') <> 1 then
+    raise exception 'FAIL: enquiry.status_changed audit event was not recorded';
+  end if;
+  raise notice 'PASS: enquiry status transition records outcome and audit history';
+end $$;
+
+-- Conversation: start_conversation creates the conversation
+-- and the opening guest message.
+do $$
+declare
+  v_conversation_id uuid;
+  v_message_id uuid;
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  v_conversation_id := public.start_conversation('a1111111-0000-4000-8000-111111111111', 'a1111111-0000-4000-8000-aaaaaaaaaaaa', 'e1111111-0000-4000-8000-000000000001', 'website', 'Is breakfast included?', 'thread-a-002', 'a1111111-0000-4000-8000-000000000001');
+  perform set_config('request.jwt.claims', '{"sub":"a1111111-0000-4000-8000-000000000001","role":"authenticated"}', true);
+  if (select count(*) from public.conversations where id = v_conversation_id and human_takeover = false and automation_paused = false) <> 1 then
+    raise exception 'FAIL: conversation was not created with automation active';
+  end if;
+  select id into v_message_id
+    from public.conversation_messages
+    where conversation_id = v_conversation_id and role = 'guest';
+  if v_message_id is null then
+    raise exception 'FAIL: opening guest message was not created';
+  end if;
+  if (select count(*) from public.audit_logs where action = 'conversation.created' and entity_id = v_conversation_id) <> 1 then
+    raise exception 'FAIL: conversation.created audit event was not recorded';
+  end if;
+  raise notice 'PASS: conversation starts with an opening guest message';
+end $$;
+
+-- Messages: a property member sends a human reply.
+do $$
+declare
+  v_message_id uuid;
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  v_message_id := public.send_message('c1111111-0000-4000-8000-000000000001', 'Yes, transfer can be arranged.', null, 'a1111111-0000-4000-8000-000000000002');
+  perform set_config('request.jwt.claims', '{"sub":"a1111111-0000-4000-8000-000000000002","role":"authenticated"}', true);
+  if (select count(*) from public.conversation_messages where id = v_message_id and role = 'human') <> 1 then
+    raise exception 'FAIL: human reply was not recorded';
+  end if;
+  if (select count(*) from public.audit_logs where action = 'message.sent' and entity_id = v_message_id) <> 1 then
+    raise exception 'FAIL: message.sent audit event was not recorded';
+  end if;
+  raise notice 'PASS: property member sends a human message';
+end $$;
+
+-- Messages: empty bodies are rejected.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  begin
+    perform public.send_message('c1111111-0000-4000-8000-000000000001', '', null, 'a1111111-0000-4000-8000-000000000002');
+    raise exception 'FAIL: empty message body was accepted';
+  exception
+    when others then
+      if SQLERRM not like 'VALIDATION_ERROR:%' then
+        raise exception 'FAIL: unexpected error: %', SQLERRM;
+      end if;
+  end;
+  raise notice 'PASS: empty message body rejected';
+end $$;
+
+-- Attachments: safe metadata is accepted and recorded as
+-- pending scan.
+do $$
+declare
+  v_attachment_id uuid;
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  v_attachment_id := public.add_message_attachment('d1111111-0000-4000-8000-000000000001', 'attachments/a1/room.pdf', 'application/pdf', 4096, repeat('c', 64), 'a1111111-0000-4000-8000-000000000002');
+  perform set_config('request.jwt.claims', '{"sub":"a1111111-0000-4000-8000-000000000002","role":"authenticated"}', true);
+  if (select count(*) from public.message_attachments where id = v_attachment_id and scan_status = 'pending') <> 1 then
+    raise exception 'FAIL: attachment metadata was not recorded';
+  end if;
+  if (select count(*) from public.audit_logs where action = 'attachment.added' and entity_id = v_attachment_id) <> 1 then
+    raise exception 'FAIL: attachment.added audit event was not recorded';
+  end if;
+  raise notice 'PASS: safe attachment metadata is recorded as pending scan';
+end $$;
+
+-- Attachments: disallowed MIME types are rejected.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  begin
+    perform public.add_message_attachment('d1111111-0000-4000-8000-000000000001', 'attachments/a1/script.exe', 'application/x-msdownload', 100, null, 'a1111111-0000-4000-8000-000000000002');
+    raise exception 'FAIL: disallowed MIME type was accepted';
+  exception
+    when others then
+      if SQLERRM not like 'VALIDATION_ERROR:%' then
+        raise exception 'FAIL: unexpected error: %', SQLERRM;
+      end if;
+  end;
+  raise notice 'PASS: disallowed attachment MIME type rejected';
+end $$;
+
+-- Attachments: oversized payloads are rejected.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  begin
+    perform public.add_message_attachment('d1111111-0000-4000-8000-000000000001', 'attachments/a1/huge.pdf', 'application/pdf', 26214401, null, 'a1111111-0000-4000-8000-000000000002');
+    raise exception 'FAIL: oversized attachment was accepted';
+  exception
+    when others then
+      if SQLERRM not like 'VALIDATION_ERROR:%' then
+        raise exception 'FAIL: unexpected error: %', SQLERRM;
+      end if;
+  end;
+  raise notice 'PASS: oversized attachment rejected';
+end $$;
+
+-- Attachments: non-hex checksums are rejected.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  begin
+    perform public.add_message_attachment('d1111111-0000-4000-8000-000000000001', 'attachments/a1/room.pdf', 'application/pdf', 100, 'not-a-hex-digest', 'a1111111-0000-4000-8000-000000000002');
+    raise exception 'FAIL: malformed checksum was accepted';
+  exception
+    when others then
+      if SQLERRM not like 'VALIDATION_ERROR:%' then
+        raise exception 'FAIL: unexpected error: %', SQLERRM;
+      end if;
+  end;
+  raise notice 'PASS: malformed attachment checksum rejected';
+end $$;
+
+-- Takeover: human control pauses automation, records a
+-- system timeline entry and an audit event.
+do $$
+declare
+  v_system_message uuid;
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  perform public.takeover_conversation('c1111111-0000-4000-8000-000000000001', 'a1111111-0000-4000-8000-000000000002');
+  perform set_config('request.jwt.claims', '{"sub":"a1111111-0000-4000-8000-000000000002","role":"authenticated"}', true);
+  if (select human_takeover from public.conversations where id = 'c1111111-0000-4000-8000-000000000001') <> true then
+    raise exception 'FAIL: human_takeover was not set';
+  end if;
+  if (select automation_paused from public.conversations where id = 'c1111111-0000-4000-8000-000000000001') <> true then
+    raise exception 'FAIL: automation was not paused on takeover';
+  end if;
+  select id into v_system_message
+    from public.conversation_messages
+    where conversation_id = 'c1111111-0000-4000-8000-000000000001' and role = 'system';
+  if v_system_message is null then
+    raise exception 'FAIL: takeover system message was not recorded';
+  end if;
+  if (select count(*) from public.audit_logs where action = 'conversation.takeover' and entity_id = 'c1111111-0000-4000-8000-000000000001') <> 1 then
+    raise exception 'FAIL: conversation.takeover audit event was not recorded';
+  end if;
+  raise notice 'PASS: human takeover pauses automation and is audited';
+end $$;
+
+-- Takeover: a second takeover while under human control is
+-- a conflict.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  begin
+    perform public.takeover_conversation('c1111111-0000-4000-8000-000000000001', 'a1111111-0000-4000-8000-000000000002');
+    raise exception 'FAIL: double takeover was allowed';
+  exception
+    when others then
+      if SQLERRM not like 'CONFLICT:%' then
+        raise exception 'FAIL: unexpected error: %', SQLERRM;
+      end if;
+  end;
+  raise notice 'PASS: double takeover rejected';
+end $$;
+
+-- Handback: explicit handback resumes automation.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  perform public.handback_conversation('c1111111-0000-4000-8000-000000000001', 'a1111111-0000-4000-8000-000000000002');
+  perform set_config('request.jwt.claims', '{"sub":"a1111111-0000-4000-8000-000000000002","role":"authenticated"}', true);
+  if (select human_takeover from public.conversations where id = 'c1111111-0000-4000-8000-000000000001') <> false then
+    raise exception 'FAIL: human_takeover was not cleared';
+  end if;
+  if (select automation_paused from public.conversations where id = 'c1111111-0000-4000-8000-000000000001') <> false then
+    raise exception 'FAIL: automation was not resumed on handback';
+  end if;
+  if (select count(*) from public.audit_logs where action = 'conversation.handback' and entity_id = 'c1111111-0000-4000-8000-000000000001') <> 1 then
+    raise exception 'FAIL: conversation.handback audit event was not recorded';
+  end if;
+  raise notice 'PASS: explicit handback resumes automation and is audited';
+end $$;
+
+-- Handback: handing back a conversation that is not under
+-- human control is a conflict.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  begin
+    perform public.handback_conversation('c1111111-0000-4000-8000-000000000001', 'a1111111-0000-4000-8000-000000000002');
+    raise exception 'FAIL: handback without takeover was allowed';
+  exception
+    when others then
+      if SQLERRM not like 'CONFLICT:%' then
+        raise exception 'FAIL: unexpected error: %', SQLERRM;
+      end if;
+  end;
+  raise notice 'PASS: handback without takeover rejected';
+end $$;
+
+-- Read state: a property member marks the enquiry read.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  perform public.mark_enquiry_read('e1111111-0000-4000-8000-000000000001', 'a1111111-0000-4000-8000-000000000002');
+  perform set_config('request.jwt.claims', '{"sub":"a1111111-0000-4000-8000-000000000002","role":"authenticated"}', true);
+  if (select unread from public.enquiries where id = 'e1111111-0000-4000-8000-000000000001') <> false then
+    raise exception 'FAIL: enquiry was not marked read';
+  end if;
+  raise notice 'PASS: property member marks an enquiry read';
+end $$;
+
+-- Read state: a non-member cannot mark enquiries read.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  begin
+    perform public.mark_enquiry_read('e1111111-0000-4000-8000-000000000001', 'b2222222-0000-4000-8000-000000000001');
+    raise exception 'FAIL: non-member marked an enquiry read';
+  exception
+    when others then
+      if SQLERRM not like 'FORBIDDEN:%' then
+        raise exception 'FAIL: unexpected error: %', SQLERRM;
+      end if;
+  end;
+  raise notice 'PASS: non-member cannot mark enquiries read';
+end $$;
+
+-- Conversation authorization: a user with no membership in
+-- the organization cannot send messages.
+do $$
+begin
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  begin
+    perform public.send_message('c1111111-0000-4000-8000-000000000001', 'Rogue message', null, 'b2222222-0000-4000-8000-000000000001');
+    raise exception 'FAIL: non-member sent a message';
+  exception
+    when others then
+      if SQLERRM not like 'FORBIDDEN:%' then
+        raise exception 'FAIL: unexpected error: %', SQLERRM;
+      end if;
+  end;
+  raise notice 'PASS: non-member message send denied';
 end $$;
 
 rollback;

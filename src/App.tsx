@@ -9,7 +9,9 @@ import { ResetPasswordPage } from './features/auth/ResetPasswordPage';
 import { SignInPage } from './features/auth/SignInPage';
 import { SignUpPage } from './features/auth/SignUpPage';
 import { BrainPage } from './features/brain/BrainPage';
+import { EnquiriesPage } from './features/enquiries/EnquiriesPage';
 import { FeaturePlaceholder } from './features/FeaturePlaceholder';
+import { InboxPage } from './features/inbox/InboxPage';
 import { OnboardingPage } from './features/onboarding/OnboardingPage';
 import { OverviewPage } from './features/overview/OverviewPage';
 import { PropertiesPage } from './features/properties/PropertiesPage';
@@ -52,23 +54,11 @@ export function App() {
                 />
                 <Route
                   path={paths.enquiries}
-                  element={
-                    <FeaturePlaceholder
-                      title="Enquiries"
-                      description="Enquiry records with classification, assignment, status, follow-up, and outcome."
-                      screenIds={['AG-ENQUIRIES', 'AG-ENQUIRY-DETAIL']}
-                    />
-                  }
+                  element={<EnquiriesPage />}
                 />
                 <Route
                   path={paths.inbox}
-                  element={
-                    <FeaturePlaceholder
-                      title="Inbox"
-                      description="Conversation timelines with drafts, approvals, human messages, and delivery results."
-                      screenIds={['AG-INBOX', 'AG-CONVERSATION']}
-                    />
-                  }
+                  element={<InboxPage />}
                 />
                 <Route
                   path={paths.brain}
