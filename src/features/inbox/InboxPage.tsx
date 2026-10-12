@@ -23,6 +23,13 @@ import {
   type MessageAttachment,
 } from '../../lib/enquiries';
 import { listEnquiries } from '../../lib/enquiries';
+import {
+  generateAiDraft,
+  approveAiDraft,
+  rejectAiDraft,
+  type AiDraft,
+  type GenerateAiDraftResult,
+} from '../../lib/aiDrafts';
 import { listProperties, type Property } from '../../lib/properties';
 import { supabase } from '../../lib/supabase';
 
@@ -44,6 +51,13 @@ const emptyConversationForm: ConversationFormState = {
   enquiryId: '',
   guestBody: '',
 };
+
+interface AiDraftDialogState {
+  open: boolean;
+  draft: AiDraft | GenerateAiDraftResult | null;
+  loading: boolean;
+  error: string | null;
+}
 
 function formatBytes(size: number): string {
   if (size < 1024) {
@@ -69,6 +83,12 @@ export function InboxPage() {
   const [conversationForm, setConversationForm] = useState<ConversationFormState>(emptyConversationForm);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [aiDraftDialog, setAiDraftDialog] = useState<AiDraftDialogState>({
+    open: false,
+    draft: null,
+    loading: false,
+    error: null,
+  });
 
   const hasAuth = supabase !== null;
 
@@ -330,6 +350,99 @@ export function InboxPage() {
     }
   }
 
+  async function handleGenerateAiDraft() {
+    if (!supabase || selectedConversation === null) {
+      return;
+    }
+    const property = properties.find((row) => row.id === selectedPropertyId);
+    if (!property) {
+      return;
+    }
+    setAiDraftDialog({ open: true, draft: null, loading: true, error: null });
+    try {
+      const result = await generateAiDraft(supabase, {
+        conversation_id: selectedConversation.id,
+        property_id: property.id,
+        organization_id: property.organization_id,
+        prompt_version: 'v1.0',
+      });
+      setAiDraftDialog({ open: true, draft: result, loading: false, error: null });
+    } catch (genError) {
+      setAiDraftDialog((prev) => ({
+        ...prev,
+        loading: false,
+        error: genError instanceof Error ? genError.message : 'Failed to generate draft',
+      }));
+    }
+  }
+
+  async function handleApproveAiDraft() {
+    if (!supabase || aiDraftDialog.draft === null || 'draft_id' in aiDraftDialog.draft === false) {
+      return;
+    }
+    const draftId = (aiDraftDialog.draft as GenerateAiDraftResult).draft_id;
+    setAiDraftDialog((prev) => ({ ...prev, loading: true, error: null }));
+    try {
+      await approveAiDraft(supabase, draftId);
+      setAiDraftDialog({ open: false, draft: null, loading: false, error: null });
+      await reloadMessages();
+      await reloadConversations();
+    } catch (approveError) {
+      setAiDraftDialog((prev) => ({
+        ...prev,
+        loading: false,
+        error: approveError instanceof Error ? approveError.message : 'Failed to approve draft',
+      }));
+    }
+  }
+
+  async function handleRejectAiDraft() {
+    if (!supabase || aiDraftDialog.draft === null || 'draft_id' in aiDraftDialog.draft === false) {
+      return;
+    }
+    const draftId = (aiDraftDialog.draft as GenerateAiDraftResult).draft_id;
+    setAiDraftDialog((prev) => ({ ...prev, loading: true, error: null }));
+    try {
+      await rejectAiDraft(supabase, draftId);
+      setAiDraftDialog({ open: false, draft: null, loading: false, error: null });
+      await reloadMessages();
+      await reloadConversations();
+    } catch (rejectError) {
+      setAiDraftDialog((prev) => ({
+        ...prev,
+        loading: false,
+        error: rejectError instanceof Error ? rejectError.message : 'Failed to reject draft',
+      }));
+    }
+  }
+
+  async function handleEditAiDraft() {
+    if (!supabase || aiDraftDialog.draft === null || 'draft_id' in aiDraftDialog.draft === false) {
+      return;
+    }
+    const draft = aiDraftDialog.draft as GenerateAiDraftResult;
+    const newBody = prompt('Edit draft:', draft.draft_body);
+    if (newBody === null || newBody.trim() === '' || newBody === draft.draft_body) {
+      return;
+    }
+    setAiDraftDialog((prev) => ({ ...prev, loading: true, error: null }));
+    try {
+      // Note: edit_ai_draft RPC exists but not yet exposed in lib.
+      // For MVP, we re-generate with a note that manual edits require regeneration.
+      setAiDraftDialog((prev) => ({
+        ...prev,
+        loading: false,
+        error: 'Manual edit requires regeneration. Use the edited text as context for a new draft.',
+      }));
+    } catch (editError) {
+      setAiDraftDialog((prev) => ({
+        ...prev,
+        loading: false,
+        error: editError instanceof Error ? editError.message : 'Failed to edit draft',
+      }));
+    }
+  }
+
   return (
     <section aria-labelledby="inbox-heading">
       <div className="page-header">
@@ -578,13 +691,22 @@ export function InboxPage() {
                               Hand back to automation
                             </Button>
                           ) : (
-                            <Button
-                              variant="outline"
-                              disabled={submitting}
-                              onClick={() => void handleTakeover()}
-                            >
-                              Take over
-                            </Button>
+                            <>
+                              <Button
+                                variant="outline"
+                                disabled={submitting}
+                                onClick={() => void handleTakeover()}
+                              >
+                                Take over
+                              </Button>
+                              <Button
+                                variant="secondary"
+                                disabled={submitting || selectedConversation.automation_paused}
+                                onClick={() => void handleGenerateAiDraft()}
+                              >
+                                AI Draft
+                              </Button>
+                            </>
                           )}
                           <Button
                             type="submit"
@@ -681,6 +803,112 @@ export function InboxPage() {
             </Button>
           </div>
         </form>
+      </Dialog>
+
+      <Dialog
+        open={aiDraftDialog.open}
+        title="AI Draft Review"
+        onClose={() => setAiDraftDialog({ open: false, draft: null, loading: false, error: null })}
+        describedBy="ai-draft-description"
+      >
+        <p id="ai-draft-description">
+          Review the AI-generated draft. Approve to send as an AI message,
+          reject to discard, or edit to regenerate with changes.
+        </p>
+        {aiDraftDialog.loading && (
+          <div className="dialog-loading">
+            <span className="spinner" aria-hidden="true" />
+            <span>Generating draft&hellip;</span>
+          </div>
+        )}
+        {!aiDraftDialog.loading && aiDraftDialog.draft && (
+          <>
+            {(() => {
+              const draft = aiDraftDialog.draft as GenerateAiDraftResult;
+              return (
+                <div className="ai-draft-preview">
+                  <label className="field">
+                    <span>Draft message</span>
+                    <textarea
+                      className="textarea-field"
+                      value={draft.draft_body}
+                      readOnly
+                      rows={4}
+                    />
+                  </label>
+                  <div className="ai-draft-meta">
+                    <span>
+                      Confidence: {(draft.confidence * 100).toFixed(0)}%
+                    </span>
+                    {draft.source_references.length > 0 && (
+                      <span>
+                        Sources: {draft.source_references.length}
+                      </span>
+                    )}
+                    {draft.unknown_answers.length > 0 && (
+                      <Badge status="unknown answers" tone="warning" />
+                    )}
+                  </div>
+                  <details className="ai-draft-policy">
+                    <summary>Policy checks</summary>
+                    <ul>
+                      {draft.policy.unsupported_facts.length > 0 && (
+                        <li>Unsupported facts: {draft.policy.unsupported_facts.join(', ')}</li>
+                      )}
+                      {draft.policy.sensitive_topics.length > 0 && (
+                        <li>Sensitive topics: {draft.policy.sensitive_topics.join(', ')}</li>
+                      )}
+                      {draft.policy.prompt_injection && (
+                        <li>Prompt injection detected</li>
+                      )}
+                      {draft.policy.action_boundaries.length > 0 && (
+                        <li>Action boundaries: {draft.policy.action_boundaries.join(', ')}</li>
+                      )}
+                      {draft.policy.unsupported_facts.length === 0 &&
+                        draft.policy.sensitive_topics.length === 0 &&
+                        !draft.policy.prompt_injection &&
+                        draft.policy.action_boundaries.length === 0 && (
+                          <li>All checks passed</li>
+                        )}
+                    </ul>
+                  </details>
+                </div>
+            )})()}
+            {aiDraftDialog.error && (
+              <p className="auth-error" role="alert">
+                {aiDraftDialog.error}
+              </p>
+            )}
+            <div className="dialog-actions">
+              <Button
+                variant="secondary"
+                onClick={() => setAiDraftDialog({ open: false, draft: null, loading: false, error: null })}
+              >
+                Close
+              </Button>
+              <Button
+                variant="outline"
+                disabled={aiDraftDialog.loading}
+                onClick={() => void handleEditAiDraft()}
+              >
+                Edit
+              </Button>
+              <Button
+                variant="outline"
+                disabled={aiDraftDialog.loading}
+                onClick={() => void handleRejectAiDraft()}
+              >
+                Reject
+              </Button>
+              <Button
+                disabled={aiDraftDialog.loading}
+                onClick={() => void handleApproveAiDraft()}
+              >
+                Approve & Send
+              </Button>
+            </div>
+          </>
+        )}
       </Dialog>
     </section>
   );

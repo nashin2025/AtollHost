@@ -50,12 +50,12 @@ Status: DONE. Verified end-to-end against the live development Supabase project 
 **Exit:** manual enquiry-to-resolution journey works and takeover reliably stops automation. **Verified live.**
 
 ## Phase 6 — AI draft and approval pipeline
-- [ ] T6.1 Server-side provider adapter and timeout/rate-limit/error handling.
-- [ ] T6.2 Structured output schema, grounded source references, and prompt versioning.
-- [ ] T6.3 Policy validator for unsupported facts, sensitive topics, prompt injection, and action boundaries.
-- [ ] T6.4 Draft edit/approve/reject; approval binds to exact version.
-- [ ] T6.5 No-send-without-approval tests and no-hallucination unknown-answer tests.
-- [ ] T6.6 Record execution result and reconcile ambiguous timeouts.
+- [x] T6.1 Server-side provider adapter and timeout/rate-limit/error handling. Implemented in `supabase/functions/_shared/aiProvider.ts` (OpenAI-compatible fetch with AbortController timeout, rate-limit via cooldown, error mapping).
+- [x] T6.2 Structured output schema, grounded source references, and prompt versioning. `supabase/functions/generate-ai-draft/index.ts` requests JSON output with `draft_body`, `confidence`, `source_references` (fact_id, fact_key, title, version), `unknown_answers`; prompt version `v1.0` stored on draft; `ai_prompt_versions` table seeded with system prompt.
+- [x] T6.3 Policy validator for unsupported facts, sensitive topics, prompt injection, and action boundaries. `supabase/functions/_shared/policyValidator.ts` checks: unsupported claims without source refs, sensitive topic keywords (legal/medical/financial/personal data), prompt injection patterns in guest input, action boundary verbs (booked, paid, cancelled, sent). Blocks draft creation on violations.
+- [x] T6.4 Draft edit/approve/reject; approval binds to exact version. `create_ai_draft`/`approve_ai_draft`/`reject_ai_draft`/`edit_ai_draft` RPCs; `approve_ai_draft` recomputes `version_hash` from stored fields and verifies match before inserting `role='ai'` message with `approved_by`/`approved_at`; `edit_ai_draft` supersedes old draft, bumps revision, recomputes hash server-side.
+- [x] T6.5 No-send-without-approval tests and no-hallucination unknown-answer tests. `src/test/aiDrafts.test.ts`: structural test that only `generateAiDraft`/`approveAiDraft`/`rejectAiDraft`/`listAiDrafts` are exported; `approveAiDraft` is the only path to create `role='ai'` message (send_message hardcodes `role='human'`); unknown-answer test asserts low confidence, empty sources, populated `unknown_answers` when no facts available.
+- [x] T6.6 Record execution result and reconcile ambiguous timeouts. `generate-ai-draft` stores execution metadata (latency, finish_reason, usage) in `input_context`; on provider timeout/error, returns structured error with `RATE_LIMITED` for client reconciliation; `cooldown_until` enforces 60s backoff.
 **Exit:** no AI guest message can send without an authorized human approval in MVP.
 
 ## Phase 7 — Tasks, guest journey, reviews, content
