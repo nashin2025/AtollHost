@@ -12,12 +12,15 @@ build/
 
 # Local tool state
 .codebase-memory/
+supabase/.temp/
 
 # OS and editor
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+.cursor/
+.zed/
 
 # Logs
 *.log
