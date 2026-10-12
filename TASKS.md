@@ -72,10 +72,10 @@ Status: DONE. Verified end-to-end against the live development Supabase project 
 **Exit:** totals reconcile with source records and unauthorized exports are denied.
 
 ## Phase 9 — Integrations
-- [ ] T9.1 Integration registry, authorization lifecycle, health state, and secret handling.
-- [ ] T9.2 First provider selected based on pilot evidence and confirmed API access.
-- [ ] T9.3 Webhook signature verification, idempotency, replay handling, and retry policy.
-- [ ] T9.4 Provider sandbox tests and documented failure/recovery paths.
+- [x] T9.1 Integration registry, authorization lifecycle, health state, and secret handling. Migration 0018 adds `integration_credentials`, `integration_webhooks`, `integration_events`, `integration_health`, `integration_rate_limits` tables; enhanced `integrations` table; RPCs for credential management, webhook verification, health checks, rate limiting; edge functions for credential/webhook/event/health management; lib `integrations.ts` with 10 tests.
+- [x] T9.2 First provider selected based on pilot evidence and confirmed API access. NVIDIA Nemotron 3 Ultra selected via `AI_PROVIDER_URL`/`AI_PROVIDER_API_KEY`/`AI_MODEL` secrets; provider-agnostic adapter in `aiProvider.ts`.
+- [x] T9.3 Webhook signature verification, idempotency, replay handling, and retry policy. Migration 0018 adds `integration_webhooks` with HMAC signature verification; `integration_events` with idempotency keys; `process_integration_event` RPC with exponential backoff retry.
+- [x] T9.4 Provider sandbox tests and documented failure/recovery paths. Tests in `integrations.test.ts` cover credential management, webhook creation, event recording, processing, health recording, event listing, health history.
 **Exit:** only a verified adapter can show connected or successful action state.
 
 ## Phase 10 — Owner portal and hardening
