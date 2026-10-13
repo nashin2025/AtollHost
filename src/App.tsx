@@ -16,6 +16,7 @@ import { OnboardingPage } from './features/onboarding/OnboardingPage';
 import { OverviewPage } from './features/overview/OverviewPage';
 import { PrivacyPolicyPage } from './features/legal/PrivacyPolicyPage';
 import { PropertiesPage } from './features/properties/PropertiesPage';
+import { ReviewsPage } from './features/reviews/ReviewsPage';
 import { ScannerPage } from './features/scanner/ScannerPage';
 import { TasksPage } from './features/tasks/TasksPage';
 import { TeamPage } from './features/team/TeamPage';
@@ -81,16 +82,7 @@ export function App() {
                     />
                   }
                 />
-                <Route
-                  path={paths.reviews}
-                  element={
-                    <FeaturePlaceholder
-                      title="Reviews"
-                      description="Review tracking with response drafts that require approval before publication."
-                      screenIds={['AG-REVIEWS', 'AG-REVIEW-RESPONSE']}
-                    />
-                  }
-                />
+                <Route path={paths.reviews} element={<ReviewsPage />} />
                 <Route
                   path={paths.content}
                   element={
