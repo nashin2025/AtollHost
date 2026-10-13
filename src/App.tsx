@@ -15,6 +15,7 @@ import { InboxPage } from './features/inbox/InboxPage';
 import { IntegrationsPage } from './features/integrations/IntegrationsPage';
 import { JourneyPage } from './features/journey/JourneyPage';
 import { OnboardingPage } from './features/onboarding/OnboardingPage';
+import { OwnerPortalPage } from './features/owner/OwnerPortalPage';
 import { OverviewPage } from './features/overview/OverviewPage';
 import { PrivacyPolicyPage } from './features/legal/PrivacyPolicyPage';
 import { PropertiesPage } from './features/properties/PropertiesPage';
@@ -84,6 +85,7 @@ export function App() {
                 <Route path={paths.team} element={<TeamPage />} />
                 <Route path={paths.settings} element={<SettingsPage />} />
               </Route>
+              <Route path={paths.owner} element={<OwnerPortalPage />} />
             </Route>
             <Route path="*" element={<Navigate to={paths.overview} replace />} />
           </Routes>

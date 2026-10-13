@@ -2,6 +2,7 @@ import { invokeFunction } from './api';
 import type { SupabaseClient } from './supabase';
 
 export interface OwnerDashboard {
+  property_name: string | null;
   revenue: {
     total: number;
     last_30d: number;
@@ -221,6 +222,21 @@ export async function listOwnerPropertyAccess(
     .from('owner_property_access')
     .select('id, owner_id, property_id, organization_id, granted_by, can_view_revenue, can_view_occupancy, can_view_reviews, can_view_tasks, can_view_knowledge, can_view_reports, can_manage_portal, granted_at, revoked_at')
     .eq('owner_id', ownerId)
+    .order('granted_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as unknown as OwnerPropertyAccess[];
+}
+
+// Agency-side view of the grants for one property. Reads rely on the
+// owner_access_org_admin_read policy (migration 0023).
+export async function listPropertyOwnerAccess(
+  client: SupabaseClient,
+  propertyId: string,
+): Promise<OwnerPropertyAccess[]> {
+  const { data, error } = await client
+    .from('owner_property_access')
+    .select('id, owner_id, property_id, organization_id, granted_by, can_view_revenue, can_view_occupancy, can_view_reviews, can_view_tasks, can_view_knowledge, can_view_reports, can_manage_portal, granted_at, revoked_at')
+    .eq('property_id', propertyId)
     .order('granted_at', { ascending: false });
   if (error) throw new Error(error.message);
   return (data ?? []) as unknown as OwnerPropertyAccess[];

@@ -20,6 +20,7 @@ export const paths = {
   integrations: '/integrations',
   team: '/team',
   settings: '/settings',
+  owner: '/owner',
   termsOfService: '/terms',
   privacyPolicy: '/privacy',
 } as const;

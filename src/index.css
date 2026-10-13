@@ -1319,6 +1319,34 @@ tbody tr:last-child td {
   overflow-wrap: anywhere;
 }
 
+.owner-access {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.owner-access h3 {
+  margin: 0 0 var(--space-2);
+}
+
+.owner-permissions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.owner-permissions legend {
+  padding: 0 var(--space-1);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
 .inbox-layout {
   display: grid;
   grid-template-columns: minmax(240px, 320px) 1fr;

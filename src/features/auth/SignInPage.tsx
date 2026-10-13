@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { Field } from '../../components/ui/Field';
 import { isAuthConfigured } from '../../lib/config';
+import { listMyMemberships } from '../../lib/memberships';
+import { listOwnerPropertyAccess } from '../../lib/ownerPortal';
 import { supabase } from '../../lib/supabase';
 import { paths } from '../../router';
 
@@ -50,11 +52,34 @@ export function SignInPage() {
       return;
     }
     const from = (location.state as { from?: unknown } | null)?.from;
-    navigate(
-      typeof from === 'string' && from.startsWith('/')
-        ? from
-        : paths.overview,
-    );
+    if (typeof from === 'string' && from.startsWith('/')) {
+      navigate(from);
+      return;
+    }
+    // Owner-only accounts have no organization membership, so send them to
+    // the owner portal instead of an empty agency workspace.
+    if (supabase) {
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        const [memberships, ownerAccess] = userData.user
+          ? await Promise.all([
+              listMyMemberships(supabase),
+              listOwnerPropertyAccess(supabase, userData.user.id),
+            ])
+          : [[], []];
+        if (
+          memberships.length === 0 &&
+          ownerAccess.some((row) => row.revoked_at === null)
+        ) {
+          navigate(paths.owner, { replace: true });
+          return;
+        }
+      } catch {
+        // Fall through to the default landing; a failed lookup is not a
+        // failed sign in.
+      }
+    }
+    navigate(paths.overview);
   }
 
   return (

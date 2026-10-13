@@ -10,6 +10,12 @@ import { Badge } from '../../components/ui/Badge';
 import { Icon } from '../../components/ui/Icon';
 import { listMyMemberships, type Membership } from '../../lib/memberships';
 import {
+  grantOwnerAccess,
+  listPropertyOwnerAccess,
+  revokeOwnerAccess,
+  type OwnerPropertyAccess,
+} from '../../lib/ownerPortal';
+import {
   assignPropertyMember,
   listOrganizationMembers,
   listProperties,
@@ -96,6 +102,16 @@ export function PropertiesPage() {
   const [assignRole, setAssignRole] = useState(propertyRoles[0].value);
   const [assignUserId, setAssignUserId] = useState('');
   const [teamError, setTeamError] = useState<string | null>(null);
+  const [ownerGrants, setOwnerGrants] = useState<OwnerPropertyAccess[]>([]);
+  const [ownerUserId, setOwnerUserId] = useState('');
+  const [ownerPermissions, setOwnerPermissions] = useState({
+    can_view_revenue: false,
+    can_view_occupancy: false,
+    can_view_reviews: false,
+    can_view_tasks: false,
+    can_view_knowledge: false,
+    can_view_reports: false,
+  });
 
   const hasAuth = supabase !== null;
 
@@ -229,16 +245,31 @@ export function PropertiesPage() {
     setTeamMembers([]);
     setOrgMembers([]);
     setAssignUserId('');
+    setOwnerGrants([]);
+    setOwnerUserId('');
+    setOwnerPermissions({
+      can_view_revenue: false,
+      can_view_occupancy: false,
+      can_view_reviews: false,
+      can_view_tasks: false,
+      can_view_knowledge: false,
+      can_view_reports: false,
+    });
     setDialog('team');
+    const admin = isAdminOf(property.organization_id);
     try {
-      const [team, members] = await Promise.all([
+      const [team, members, grants] = await Promise.all([
         listPropertyTeam(supabase, property.id),
-        isAdminOf(property.organization_id)
+        admin
           ? listOrganizationMembers(supabase, property.organization_id)
           : Promise.resolve<OrganizationMember[]>([]),
+        admin
+          ? listPropertyOwnerAccess(supabase, property.id)
+          : Promise.resolve<OwnerPropertyAccess[]>([]),
       ]);
       setTeamMembers(team);
       setOrgMembers(members);
+      setOwnerGrants(grants.filter((grant) => grant.revoked_at === null));
     } catch {
       setTeamError('The team could not be loaded.');
     }
@@ -330,6 +361,55 @@ export function PropertiesPage() {
       await revokePropertyMember(supabase, selectedProperty.id, member.user_id);
       const team = await listPropertyTeam(supabase, selectedProperty.id);
       setTeamMembers(team);
+    } catch (submitError) {
+      setTeamError(submitError instanceof Error ? submitError.message : null);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleGrantOwner(event: FormEvent) {
+    event.preventDefault();
+    if (!supabase || !selectedProperty || ownerUserId.length === 0) {
+      return;
+    }
+    setSubmitting(true);
+    setTeamError(null);
+    try {
+      await grantOwnerAccess(supabase, {
+        owner_id: ownerUserId,
+        property_id: selectedProperty.id,
+        organization_id: selectedProperty.organization_id,
+        permissions: ownerPermissions,
+      });
+      const grants = await listPropertyOwnerAccess(supabase, selectedProperty.id);
+      setOwnerGrants(grants.filter((grant) => grant.revoked_at === null));
+      setOwnerUserId('');
+      setOwnerPermissions({
+        can_view_revenue: false,
+        can_view_occupancy: false,
+        can_view_reviews: false,
+        can_view_tasks: false,
+        can_view_knowledge: false,
+        can_view_reports: false,
+      });
+    } catch (submitError) {
+      setTeamError(submitError instanceof Error ? submitError.message : null);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleRevokeOwner(grant: OwnerPropertyAccess) {
+    if (!supabase || !selectedProperty) {
+      return;
+    }
+    setSubmitting(true);
+    setTeamError(null);
+    try {
+      await revokeOwnerAccess(supabase, grant.owner_id, grant.property_id);
+      const grants = await listPropertyOwnerAccess(supabase, selectedProperty.id);
+      setOwnerGrants(grants.filter((row) => row.revoked_at === null));
     } catch (submitError) {
       setTeamError(submitError instanceof Error ? submitError.message : null);
     } finally {
@@ -630,6 +710,115 @@ export function PropertiesPage() {
               </Button>
             </div>
           </form>
+        )}
+
+        {isAdminOf(selectedProperty?.organization_id ?? '') && (
+          <div className="owner-access">
+            <h3>Owner access</h3>
+            <p className="stat-context">
+              Owners see a read-only portal with only the sections you grant.
+              Invite the owner through Team &amp; Access first if they do not
+              have an account yet.
+            </p>
+            {ownerGrants.length === 0 ? (
+              <p>No owners have access to this property yet.</p>
+            ) : (
+              <ul className="team-list">
+                {ownerGrants.map((grant) => {
+                  const owner = orgMembers.find(
+                    (member) => member.user_id === grant.owner_id,
+                  );
+                  const permissions = [
+                    grant.can_view_revenue && 'revenue',
+                    grant.can_view_occupancy && 'occupancy',
+                    grant.can_view_reviews && 'reviews',
+                    grant.can_view_tasks && 'tasks',
+                    grant.can_view_knowledge && 'knowledge',
+                    grant.can_view_reports && 'reports',
+                  ].filter((label): label is string => label !== false);
+                  return (
+                    <li key={grant.id} className="team-list-item">
+                      <div>
+                        <p className="table-primary">
+                          {owner?.full_name ?? owner?.email ?? grant.owner_id}
+                        </p>
+                        <p className="table-secondary">
+                          {permissions.length > 0
+                            ? `Can view: ${permissions.join(', ')}`
+                            : 'No sections granted'}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        disabled={submitting}
+                        onClick={() => void handleRevokeOwner(grant)}
+                      >
+                        Revoke
+                      </Button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            <form onSubmit={handleGrantOwner} noValidate>
+              <SelectField
+                label="Owner"
+                value={ownerUserId}
+                onChange={(event) => setOwnerUserId(event.target.value)}
+                required
+              >
+                <option value="">Choose a member…</option>
+                {orgMembers
+                  .filter(
+                    (member) =>
+                      !ownerGrants.some((grant) => grant.owner_id === member.user_id),
+                  )
+                  .map((member) => (
+                    <option key={member.user_id} value={member.user_id}>
+                      {member.full_name ?? member.email}
+                    </option>
+                  ))}
+              </SelectField>
+              <fieldset className="owner-permissions">
+                <legend>Portal sections</legend>
+                {[
+                  { key: 'can_view_revenue', label: 'Revenue' },
+                  { key: 'can_view_occupancy', label: 'Occupancy' },
+                  { key: 'can_view_reviews', label: 'Reviews' },
+                  { key: 'can_view_tasks', label: 'Tasks' },
+                  { key: 'can_view_knowledge', label: 'Verified facts' },
+                  { key: 'can_view_reports', label: 'Reports' },
+                ].map((option) => (
+                  <label key={option.key} className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={
+                        ownerPermissions[
+                          option.key as keyof typeof ownerPermissions
+                        ]
+                      }
+                      onChange={(event) =>
+                        setOwnerPermissions({
+                          ...ownerPermissions,
+                          [option.key]: event.target.checked,
+                        })
+                      }
+                    />
+                    {option.label}
+                  </label>
+                ))}
+              </fieldset>
+              <div className="dialog-actions">
+                <Button
+                  type="submit"
+                  loading={submitting}
+                  disabled={ownerUserId.length === 0}
+                >
+                  Grant owner access
+                </Button>
+              </div>
+            </form>
+          </div>
         )}
       </Dialog>
     </section>
