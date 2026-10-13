@@ -11,7 +11,6 @@ import { SignUpPage } from './features/auth/SignUpPage';
 import { BrainPage } from './features/brain/BrainPage';
 import { ContentPage } from './features/content/ContentPage';
 import { EnquiriesPage } from './features/enquiries/EnquiriesPage';
-import { FeaturePlaceholder } from './features/FeaturePlaceholder';
 import { InboxPage } from './features/inbox/InboxPage';
 import { IntegrationsPage } from './features/integrations/IntegrationsPage';
 import { JourneyPage } from './features/journey/JourneyPage';
@@ -22,6 +21,7 @@ import { PropertiesPage } from './features/properties/PropertiesPage';
 import { ReportsPage } from './features/reports/ReportsPage';
 import { ReviewsPage } from './features/reviews/ReviewsPage';
 import { ScannerPage } from './features/scanner/ScannerPage';
+import { SettingsPage } from './features/settings/SettingsPage';
 import { TasksPage } from './features/tasks/TasksPage';
 import { TeamPage } from './features/team/TeamPage';
 import { TermsOfServicePage } from './features/legal/TermsOfServicePage';
@@ -82,16 +82,7 @@ export function App() {
                 <Route path={paths.reports} element={<ReportsPage />} />
                 <Route path={paths.integrations} element={<IntegrationsPage />} />
                 <Route path={paths.team} element={<TeamPage />} />
-                <Route
-                  path={paths.settings}
-                  element={
-                    <FeaturePlaceholder
-                      title="Settings"
-                      description="Organization settings and workspace preferences."
-                      screenIds={['AG-SETTINGS', 'AG-AUDIT-LOG']}
-                    />
-                  }
-                />
+                <Route path={paths.settings} element={<SettingsPage />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to={paths.overview} replace />} />
