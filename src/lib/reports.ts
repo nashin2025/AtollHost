@@ -69,3 +69,19 @@ export async function getReportRun(
   }
   return data as unknown as ReportRun;
 }
+
+export async function listReportRuns(
+  client: SupabaseClient,
+  organizationId: string,
+): Promise<ReportRun[]> {
+  const { data, error } = await client
+    .from('report_runs')
+    .select('id, definition_id, organization_id, property_id, parameters, status, row_count, result_csv, error, started_at, completed_at, triggered_by')
+    .eq('organization_id', organizationId)
+    .order('started_at', { ascending: false })
+    .limit(20);
+  if (error) {
+    throw new Error(error.message);
+  }
+  return (data ?? []) as unknown as ReportRun[];
+}

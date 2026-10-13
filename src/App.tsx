@@ -18,6 +18,7 @@ import { OnboardingPage } from './features/onboarding/OnboardingPage';
 import { OverviewPage } from './features/overview/OverviewPage';
 import { PrivacyPolicyPage } from './features/legal/PrivacyPolicyPage';
 import { PropertiesPage } from './features/properties/PropertiesPage';
+import { ReportsPage } from './features/reports/ReportsPage';
 import { ReviewsPage } from './features/reviews/ReviewsPage';
 import { ScannerPage } from './features/scanner/ScannerPage';
 import { TasksPage } from './features/tasks/TasksPage';
@@ -77,16 +78,7 @@ export function App() {
                 <Route path={paths.journey} element={<JourneyPage />} />
                 <Route path={paths.reviews} element={<ReviewsPage />} />
                 <Route path={paths.content} element={<ContentPage />} />
-                <Route
-                  path={paths.reports}
-                  element={
-                    <FeaturePlaceholder
-                      title="Reports"
-                      description="Defined metrics with documented calculations and permission-checked exports."
-                      screenIds={['AG-REPORTS', 'AG-EXPORT']}
-                    />
-                  }
-                />
+                <Route path={paths.reports} element={<ReportsPage />} />
                 <Route
                   path={paths.integrations}
                   element={
