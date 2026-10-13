@@ -13,6 +13,7 @@ import { ContentPage } from './features/content/ContentPage';
 import { EnquiriesPage } from './features/enquiries/EnquiriesPage';
 import { FeaturePlaceholder } from './features/FeaturePlaceholder';
 import { InboxPage } from './features/inbox/InboxPage';
+import { IntegrationsPage } from './features/integrations/IntegrationsPage';
 import { JourneyPage } from './features/journey/JourneyPage';
 import { OnboardingPage } from './features/onboarding/OnboardingPage';
 import { OverviewPage } from './features/overview/OverviewPage';
@@ -79,16 +80,7 @@ export function App() {
                 <Route path={paths.reviews} element={<ReviewsPage />} />
                 <Route path={paths.content} element={<ContentPage />} />
                 <Route path={paths.reports} element={<ReportsPage />} />
-                <Route
-                  path={paths.integrations}
-                  element={
-                    <FeaturePlaceholder
-                      title="Integrations"
-                      description="Integration registry with honest health states. Manual and CSV workflows first."
-                      screenIds={['AG-INTEGRATIONS']}
-                    />
-                  }
-                />
+                <Route path={paths.integrations} element={<IntegrationsPage />} />
                 <Route path={paths.team} element={<TeamPage />} />
                 <Route
                   path={paths.settings}
