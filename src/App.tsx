@@ -17,6 +17,7 @@ import { OverviewPage } from './features/overview/OverviewPage';
 import { PrivacyPolicyPage } from './features/legal/PrivacyPolicyPage';
 import { PropertiesPage } from './features/properties/PropertiesPage';
 import { ScannerPage } from './features/scanner/ScannerPage';
+import { TasksPage } from './features/tasks/TasksPage';
 import { TermsOfServicePage } from './features/legal/TermsOfServicePage';
 import { ToastProvider } from './components/ui/Toast';
 import { paths } from './router';
@@ -68,16 +69,7 @@ export function App() {
                   path={paths.brain}
                   element={<BrainPage />}
                 />
-                <Route
-                  path={paths.tasks}
-                  element={
-                    <FeaturePlaceholder
-                      title="Tasks"
-                      description="Assigned work with due dates, comments, completion evidence, and overdue state."
-                      screenIds={['AG-TASKS', 'AG-TASK-DETAIL']}
-                    />
-                  }
-                />
+                <Route path={paths.tasks} element={<TasksPage />} />
                 <Route
                   path={paths.journey}
                   element={
