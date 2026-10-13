@@ -125,7 +125,7 @@ export function TermsOfServicePage() {
           <h2>13. Contact</h2>
           <p>
             If you have questions about these Terms, please contact us at
-            <a href="mailto:legal@atollhost.com">legal@atollhost.com</a>.
+            <a href="mailto:shannashin2018@gmail.com">shannashin2018@gmail.com</a>.
           </p>
         </section>
 
