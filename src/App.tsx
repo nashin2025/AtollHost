@@ -13,6 +13,7 @@ import { ContentPage } from './features/content/ContentPage';
 import { EnquiriesPage } from './features/enquiries/EnquiriesPage';
 import { FeaturePlaceholder } from './features/FeaturePlaceholder';
 import { InboxPage } from './features/inbox/InboxPage';
+import { JourneyPage } from './features/journey/JourneyPage';
 import { OnboardingPage } from './features/onboarding/OnboardingPage';
 import { OverviewPage } from './features/overview/OverviewPage';
 import { PrivacyPolicyPage } from './features/legal/PrivacyPolicyPage';
@@ -73,16 +74,7 @@ export function App() {
                   element={<BrainPage />}
                 />
                 <Route path={paths.tasks} element={<TasksPage />} />
-                <Route
-                  path={paths.journey}
-                  element={
-                    <FeaturePlaceholder
-                      title="Guest Journey"
-                      description="Journey event timeline. Automated messages stay disabled until configured and approved."
-                      screenIds={['AG-JOURNEY']}
-                    />
-                  }
-                />
+                <Route path={paths.journey} element={<JourneyPage />} />
                 <Route path={paths.reviews} element={<ReviewsPage />} />
                 <Route path={paths.content} element={<ContentPage />} />
                 <Route
