@@ -10,6 +10,14 @@ interface Props {
 
 export function Dialog({ open, title, onClose, children, describedBy }: Props) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+
+  // Keep the latest onClose without making it an effect dependency: an inline
+  // arrow prop changes identity on every parent render, and re-running the
+  // focus effect mid-typing would steal focus back to the close button.
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
   useEffect(() => {
     if (!open) {
@@ -18,7 +26,7 @@ export function Dialog({ open, title, onClose, children, describedBy }: Props) {
     const previouslyFocused = document.activeElement as HTMLElement | null;
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onClose();
+        onCloseRef.current();
       }
       if (event.key === 'Tab') {
         trapFocus(event, dialogRef.current);
@@ -34,7 +42,7 @@ export function Dialog({ open, title, onClose, children, describedBy }: Props) {
       document.removeEventListener('keydown', onKey);
       previouslyFocused?.focus();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) {
     return null;

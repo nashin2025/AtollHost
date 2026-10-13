@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
@@ -36,6 +37,30 @@ describe('Dialog', () => {
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     await user.keyboard('{Escape}');
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps form focus when the parent re-renders', async () => {
+    const user = userEvent.setup();
+    function Harness() {
+      const [value, setValue] = useState('');
+      return (
+        <Dialog open title="Edit" onClose={() => {}}>
+          <input
+            aria-label="Name"
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+          />
+        </Dialog>
+      );
+    }
+    render(<Harness />);
+    const input = screen.getByLabelText('Name');
+    await user.click(input);
+    await user.keyboard('a');
+    expect(input).toHaveFocus();
+    await user.keyboard('b');
+    expect(input).toHaveFocus();
+    expect(input).toHaveValue('ab');
   });
 });
 
