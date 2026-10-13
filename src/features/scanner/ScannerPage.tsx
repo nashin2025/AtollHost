@@ -7,7 +7,7 @@ import { LoadingState } from '../../components/ui/States';
 import { Field } from '../../components/ui/Field';
 import { SelectField } from '../../components/ui/Field';
 import { Badge } from '../../components/ui/Badge';
-import { DataTable, type Column } from '../../components/ui/DataTable';
+import { Icon } from '../../components/ui/Icon';
 import { listMyMemberships, type Membership } from '../../lib/memberships';
 import { listProperties, type Property } from '../../lib/properties';
 import {
@@ -45,6 +45,19 @@ function runTone(status: string): 'info' | 'success' | 'warning' | 'neutral' {
     return 'neutral';
   }
   return 'info';
+}
+
+function scoreBand(score: number | null): 'high' | 'mid' | 'low' | 'none' {
+  if (score === null) {
+    return 'none';
+  }
+  if (score >= 80) {
+    return 'high';
+  }
+  if (score >= 50) {
+    return 'mid';
+  }
+  return 'low';
 }
 
 export function ScannerPage() {
@@ -232,63 +245,6 @@ export function ScannerPage() {
     }
   }
 
-  const columns: Column<ScannerRun>[] = [
-    {
-      key: 'target',
-      header: 'Target',
-      sortValue: (row) => row.target_name,
-      render: (row) => (
-        <div>
-          <p className="table-primary">{row.target_name}</p>
-          <p className="table-secondary">{row.target_url ?? '—'}</p>
-        </div>
-      ),
-    },
-    {
-      key: 'property',
-      header: 'Property',
-      sortValue: (row) => row.property?.name ?? '',
-      render: (row) => row.property?.name ?? 'Organization-wide',
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      sortValue: (row) => row.status,
-      render: (row) => <Badge status={row.status} tone={runTone(row.status)} />,
-    },
-    {
-      key: 'score',
-      header: 'Score',
-      sortValue: (row) => row.score ?? -1,
-      render: (row) =>
-        row.score === null ? '—' : `${row.score}%`,
-    },
-    {
-      key: 'pending',
-      header: 'Pending review',
-      sortValue: (row) => pendingCount(row.id),
-      render: (row) => String(pendingCount(row.id)),
-    },
-    {
-      key: 'created',
-      header: 'Started',
-      sortValue: (row) => row.created_at,
-      render: (row) => new Date(row.created_at).toLocaleString(),
-    },
-    {
-      key: 'actions',
-      header: '',
-      render: (row) => (
-        <Button
-          variant="outline"
-          onClick={() => setSelectedRun(row)}
-        >
-          View findings
-        </Button>
-      ),
-    },
-  ];
-
   const selectedFindings = selectedRun
     ? findingsForRun(selectedRun.id)
     : [];
@@ -309,15 +265,74 @@ export function ScannerPage() {
           <Button onClick={openDialog}>Start scan</Button>
         )}
       </div>
-      <DataTable
-        columns={columns}
-        rows={runs}
-        rowKey={(row) => row.id}
-        emptyMessage="No scans yet. Start a scan to audit a property website."
-        emptyAction={
-          properties.length > 0 ? <Button onClick={openDialog}>Start scan</Button> : undefined
-        }
-      />
+      {runs.length === 0 ? (
+        <EmptyState
+          title="No scans yet"
+          message="Start a scan to audit a property website. The scanner fetches one page, then records findings for review."
+          action={
+            properties.length > 0 ? (
+              <Button onClick={openDialog}>Start scan</Button>
+            ) : undefined
+          }
+        />
+      ) : (
+        <div className="scan-grid">
+          {runs.map((run) => {
+            const pending = pendingCount(run.id);
+            return (
+              <article key={run.id} className="scan-card">
+                <header className="scan-card-header">
+                  <span className="scan-card-icon">
+                    <Icon>
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.3-4.3" />
+                    </Icon>
+                  </span>
+                  <div className="scan-card-title">
+                    <h2>{run.target_name}</h2>
+                    <p className="scan-card-url">{run.target_url ?? 'No target URL'}</p>
+                  </div>
+                  <Badge status={run.status} tone={runTone(run.status)} />
+                </header>
+                <div className={`scan-score scan-score-${scoreBand(run.score)}`}>
+                  <span className="scan-score-track" aria-hidden="true">
+                    <span
+                      className="scan-score-fill"
+                      style={{ width: `${run.score ?? 0}%` }}
+                    />
+                  </span>
+                  <span className="scan-score-value">
+                    {run.score === null ? 'Not scored' : `${run.score}%`}
+                  </span>
+                </div>
+                <dl className="scan-card-meta">
+                  <div>
+                    <dt>Property</dt>
+                    <dd>{run.property?.name ?? 'Organization-wide'}</dd>
+                  </div>
+                  <div>
+                    <dt>Started</dt>
+                    <dd>{new Date(run.created_at).toLocaleString()}</dd>
+                  </div>
+                </dl>
+                <footer className="scan-card-actions">
+                  {pending > 0 ? (
+                    <Badge
+                      status={`${pending} awaiting review`}
+                      tone="warning"
+                    />
+                  ) : (
+                    <span className="table-secondary">Nothing to review</span>
+                  )}
+                  <Button variant="outline" onClick={() => setSelectedRun(run)}>
+                    View findings
+                  </Button>
+                </footer>
+              </article>
+            );
+          })}
+        </div>
+      )}
 
       <Dialog
         open={dialogOpen}
@@ -393,13 +408,40 @@ export function ScannerPage() {
       >
         {selectedRun && (
           <div className="scanner-detail">
-            <p className="page-description">
-              {selectedRun.summary ?? 'No summary.'} Score:{' '}
-              {selectedRun.score === null ? '—' : `${selectedRun.score}%`}.
-              Target: {selectedRun.target_url ?? '—'}.
+            <div className={`scan-detail-score scan-score-${scoreBand(selectedRun.score)}`}>
+              <p className="finding-summary">
+                {selectedRun.summary ?? 'No summary.'}
+              </p>
+              <div className="scan-detail-score-value">
+                <span className="table-secondary">Score</span>
+                <strong>
+                  {selectedRun.score === null
+                    ? '—'
+                    : `${selectedRun.score}%`}
+                </strong>
+                <span className="scan-score-track" aria-hidden="true">
+                  <span
+                    className="scan-score-fill"
+                    style={{ width: `${selectedRun.score ?? 0}%` }}
+                  />
+                </span>
+              </div>
+              <p className="finding-category">
+                Target: {selectedRun.target_url ?? '—'}
+              </p>
+            </div>
+            <p className="finding-count">
+              {selectedFindings.length}{' '}
+              {selectedFindings.length === 1 ? 'finding' : 'findings'}
+              {selectedFindings.length > 0 && (
+                <> · {pendingCount(selectedRun.id)} awaiting review</>
+              )}
             </p>
             {selectedFindings.length === 0 ? (
-              <p>No findings were recorded for this scan.</p>
+              <EmptyState
+                title="No findings"
+                message="No findings were recorded for this scan."
+              />
             ) : (
               <ul className="findings-list">
                 {selectedFindings.map((finding) => (
@@ -422,7 +464,7 @@ export function ScannerPage() {
                       {finding.category} · source: {finding.source}
                     </p>
                     <p>{finding.finding}</p>
-                    <p>
+                    <p className="finding-recommendation">
                       <strong>Recommended action:</strong>{' '}
                       {finding.recommendation}
                     </p>

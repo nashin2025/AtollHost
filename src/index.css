@@ -1137,6 +1137,172 @@ tbody tr:last-child td {
   margin: 0;
 }
 
+.scan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-4);
+}
+
+.scan-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-4);
+}
+
+.scan-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.scan-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.scan-card-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.scan-card-title {
+  min-width: 0;
+}
+
+.scan-card-title h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 var(--space-1);
+}
+
+.scan-card-url {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.scan-card-header .badge {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.scan-score {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.scan-score-track {
+  position: relative;
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.scan-score-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--text-muted);
+  transition: width 160ms ease-out;
+}
+
+.scan-score-high .scan-score-fill {
+  background: var(--success);
+}
+
+.scan-score-mid .scan-score-fill {
+  background: var(--warning);
+}
+
+.scan-score-low .scan-score-fill {
+  background: var(--danger);
+}
+
+.scan-score-value {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.scan-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  margin: 0;
+}
+
+.scan-card-meta dt {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: var(--space-1);
+}
+
+.scan-card-meta dd {
+  font-size: 14px;
+  margin: 0;
+}
+
+.scan-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+
+.scan-detail-score {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+}
+
+.scan-detail-score-value {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.finding-summary {
+  margin: 0;
+}
+
+.finding-count {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.finding-recommendation {
+  margin: 0 0 var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+}
+
 .inbox-layout {
   display: grid;
   grid-template-columns: minmax(240px, 320px) 1fr;
