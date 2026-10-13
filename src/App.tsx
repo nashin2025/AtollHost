@@ -9,6 +9,7 @@ import { ResetPasswordPage } from './features/auth/ResetPasswordPage';
 import { SignInPage } from './features/auth/SignInPage';
 import { SignUpPage } from './features/auth/SignUpPage';
 import { BrainPage } from './features/brain/BrainPage';
+import { ContentPage } from './features/content/ContentPage';
 import { EnquiriesPage } from './features/enquiries/EnquiriesPage';
 import { FeaturePlaceholder } from './features/FeaturePlaceholder';
 import { InboxPage } from './features/inbox/InboxPage';
@@ -83,16 +84,7 @@ export function App() {
                   }
                 />
                 <Route path={paths.reviews} element={<ReviewsPage />} />
-                <Route
-                  path={paths.content}
-                  element={
-                    <FeaturePlaceholder
-                      title="Content"
-                      description="Content calendar with draft, review, approved, published, and failed states."
-                      screenIds={['AG-CONTENT']}
-                    />
-                  }
-                />
+                <Route path={paths.content} element={<ContentPage />} />
                 <Route
                   path={paths.reports}
                   element={

@@ -77,8 +77,14 @@ describe('OverviewPage', () => {
   it('renders live counts with context for each metric', async () => {
     renderOverview();
 
+    // Wait on a ready-state-only element first: the h1 also exists in the
+    // loading state, so asserting on it would let the sync assertions below
+    // race the count queries.
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Overview' }),
+      await screen.findByText('Across your organizations'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Overview' }),
     ).toBeInTheDocument();
     for (const title of [
       'Properties',
