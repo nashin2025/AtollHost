@@ -1,80 +1,174 @@
-# AtollHost Terms of Service — Draft for Legal Review
+# AtollHost Terms of Service
 
-**Status:** Draft only. A qualified lawyer must adapt this document to the operating entity, actual service, pricing, customer contracts, governing law, and consumer/business context before use. This draft is not legal advice.
+**Effective Date:** October 13, 2026  
+**Last Updated:** October 13, 2026  
+**Version:** 1.0
 
-## 1. Parties and acceptance
+**Status:** Pending final legal review. Fees, liability, governing law, and termination clauses must be confirmed by qualified counsel for the operating entity before this document is treated as final. This document is not legal advice.
 
-These terms govern use of the AtollHost service between the legal entity operating AtollHost (the “Provider”) and the organization or person accepting the terms (the “Customer”). The Provider's legal identity and contact details must be completed and verified before publication. By using the service after valid acceptance, the Customer agrees to the final published terms.
+---
 
-## 2. Service description
+## 1. Agreement to Terms
 
-AtollHost provides digital-operations tools for guesthouse operators, which may include property information management, enquiry tracking, task management, AI-generated drafts, review/content workflows, reports, and third-party integrations. Feature availability depends on the plan, configuration, permissions, and actual integrations enabled.
+These Terms of Service ("Terms") govern use of the AtollHost service ("the Service") between the legal entity operating AtollHost ("AtollHost", "we", "us") and the organization or person accepting them ("Customer", "you"). By creating an account or using the Service, you agree to these Terms. If you accept on behalf of an organization, you confirm that you have authority to bind that organization.
 
-AtollHost is not a full PMS, booking engine, channel manager, payment processor, accounting service, legal/tax advisor, or government filing agent unless a separate written agreement explicitly states otherwise. A draft, export, or recordkeeping feature does not mean a booking, payment, government filing, or external publication has occurred.
+---
 
-## 3. Accounts and authority
+## 2. Service Description
 
-Customers must provide accurate account information, protect credentials, and promptly report suspected compromise. Organization administrators are responsible for granting appropriate access and removing access when a user no longer needs it. Users may only access properties and data they are authorized to access.
+AtollHost provides digital-operations tools for guesthouse operators, which may include:
 
-## 4. Customer responsibilities
+- Property information management (descriptions, rooms, policies, amenities, FAQs)
+- Enquiry and conversation tracking across connected channels
+- Task management and team coordination
+- AI-assisted draft generation with human approval
+- Review and content workflows
+- Reports and exports
+- Third-party integrations you choose to enable
 
-The Customer is responsible for:
-- Ensuring it has the rights, permissions, and lawful basis to submit guest, staff, property, review, and message data.
-- Keeping property facts, policies, rates, availability, transfer schedules, and public claims accurate and current.
+**What the Service is not.** AtollHost is not a property management system (PMS), booking engine, channel manager, payment processor, accounting service, legal or tax adviser, or government filing agent unless a separate written agreement explicitly states otherwise. A draft, export, or record you create in the Service is a working document: creating it does not mean a booking, payment, government filing, or external publication has occurred.
+
+Feature availability depends on your plan, configuration, permissions, and the integrations you have enabled.
+
+---
+
+## 3. Accounts and Access
+
+- You must provide accurate account information and keep it current.
+- You are responsible for protecting your credentials and must promptly report suspected compromise.
+- Organization administrators are responsible for granting appropriate access and removing access when a user no longer needs it.
+- Users may only access the properties and data they are authorized to access.
+
+---
+
+## 4. Your Responsibilities
+
+You are responsible for:
+
+- Ensuring you have the rights, permissions, and lawful basis to submit guest, staff, property, review, and message data to the Service.
+- Keeping property facts, policies, rates, availability, transfer schedules, and public-facing claims accurate and current.
 - Reviewing AI-generated content before sending or publishing it.
 - Obtaining required consent and honoring communication opt-outs.
-- Ensuring staff use the service in compliance with applicable laws, platform terms, and third-party agreements.
-- Verifying tax, tourism, immigration, and other regulatory obligations with appropriate official sources/advisers.
+- Ensuring your staff use the Service in compliance with applicable laws, platform terms, and third-party agreements.
+- Verifying tax, tourism, immigration, and other regulatory obligations with appropriate official sources or advisers.
 
-## 5. AI features and human review
+---
 
-AI output is probabilistic and may be incomplete, outdated, or incorrect. It is provided as assistance, not a guarantee of accuracy. The Customer must review generated content and must not rely on AI alone for safety-critical, financial, legal, refund/cancellation, availability, or regulatory decisions. In the MVP, guest-facing AI messages require human approval. The Customer remains responsible for final communications and commitments.
+## 5. AI-Assisted Features
 
-## 6. Third-party services
+- AI output is probabilistic and may be incomplete, outdated, or incorrect. It is provided as assistance, not a guarantee of accuracy.
+- You must review generated content before use, and you must not rely on AI alone for safety-critical, financial, legal, refund or cancellation, availability, or regulatory decisions.
+- Guest-facing AI drafts require human approval before sending.
+- You remain responsible for all final communications and commitments made in your name.
+- You can enable or disable AI features per property in organization settings at any time.
 
-Integrations are subject to third-party availability, terms, scopes, and API changes. A provider may revoke access or change its service. AtollHost must not be described as integrated with a provider unless the relevant feature is implemented and enabled. The Provider is not responsible for third-party systems beyond responsibilities established in the final agreement.
+---
 
-## 7. Customer data and privacy
+## 6. Third-Party Services and Integrations
 
-Customer data ownership, permitted processing, confidentiality, retention, deletion, and any data-processing terms must be set out in the final agreement and privacy notice. Customers must not upload unlawful, malicious, or unnecessary sensitive data. The Provider must not use customer data for unrelated purposes not disclosed in the final terms.
+Integrations are subject to third-party availability, terms, permission scopes, and API changes. A provider may revoke access or change its service, and we are not responsible for third-party systems beyond the responsibilities set out in these Terms. We only describe the Service as integrated with a provider when the relevant feature is implemented and enabled.
 
-## 8. Acceptable use
+---
 
-Customers must not misuse the service, attempt unauthorized access, circumvent security, interfere with other tenants, send unlawful or unsolicited communications, upload malware, violate third-party platform rules, or use the service to make deceptive claims. The Provider may suspend access when reasonably necessary to protect users, the service, or legal obligations, subject to final contract terms.
+## 7. Customer Data and Privacy
 
-## 9. Availability, support, and changes
+- You retain ownership of the data you submit. You grant us a limited license to store, process, and display that data as needed to provide and improve the Service.
+- We process personal data as described in our Privacy Policy. Any data-processing terms are set out there and in any separate written agreement.
+- You must not upload unlawful, malicious, or unnecessary sensitive data.
+- We will not use your data for purposes not disclosed in our Privacy Policy or these Terms.
 
-The final agreement must define support channels, hours, service levels, maintenance, feature changes, and any uptime commitments. Do not imply an SLA unless one is expressly agreed in writing. The Provider may update the service; material changes and notice rights must be specified in the final version.
+---
 
-## 10. Fees and taxes
+## 8. Acceptable Use
 
-Pricing, billing cycle, payment methods, refunds, suspension for non-payment, and tax treatment must be described in the applicable order form or plan. No fee or payment promise is created by this draft alone.
+You must not:
 
-## 11. Intellectual property
+- Use the Service for any unlawful purpose or in violation of these Terms.
+- Attempt to gain unauthorized access to any part of the Service or circumvent its security controls.
+- Interfere with other tenants' use of the Service.
+- Send unlawful or unsolicited communications.
+- Upload malware or other harmful code.
+- Violate third-party platform rules, including marketplace and messaging provider terms.
+- Use the Service to make deceptive claims about properties, availability, or pricing.
 
-The Provider retains rights in AtollHost software and service materials except as granted in the final agreement. Customers retain rights to their submitted content, subject to the limited license necessary to provide the service. Third-party software and assets remain subject to their own licenses.
+We may suspend access when reasonably necessary to protect users, the Service, or legal obligations. Except in an emergency, we will give notice and, where practical, an opportunity to resolve the issue first.
 
-## 12. Suspension and termination
+---
 
-The final agreement must state termination rights, effects, data export/deletion windows, and treatment of unpaid invoices. Security or abuse suspension should be proportionate and documented. No retention or deletion promise should be made until implemented and verified.
+## 9. Availability, Support, and Changes
 
-## 13. Disclaimers and liability
+[⚠️ **LEGAL REVIEW REQUIRED**]
 
-Any warranty disclaimer, limitation of liability, indemnity, force majeure, and exclusion must be reviewed for enforceability under the governing law. Nothing in this draft should be interpreted to waive rights that cannot legally be waived.
+- Support channels, hours, and any service levels are as agreed in writing. We do not offer an uptime commitment unless one is expressly agreed in writing.
+- We may update, change, or discontinue features. We will give reasonable advance notice of material changes that materially reduce functionality you actively use.
+- Scheduled maintenance may temporarily affect availability.
 
-## 14. Governing law and disputes
+---
 
-The governing law, venue, dispute process, and notices must be set by the Provider after legal review. Do not assume a governing-law clause without an approved operating entity and legal advice.
+## 10. Fees and Taxes
 
-## 15. Changes and contact
+[⚠️ **LEGAL REVIEW REQUIRED**]
 
-The final terms must include an effective date, version, notice method, and valid Provider contact.
+Pricing, billing cycle, payment methods, refunds, and suspension for non-payment are described in your applicable plan or order form. Fees are exclusive of taxes, and you are responsible for applicable taxes, levies, and duties imposed by taxing authorities.
 
-## Pre-publication checklist
+---
+
+## 11. Intellectual Property
+
+- We retain all rights in the AtollHost software, service materials, and branding. These Terms grant you a limited right to use the Service, not ownership of it.
+- You retain rights to the content you submit, subject to the limited license in Section 7 needed to provide the Service.
+- Third-party software and assets remain subject to their own licenses.
+
+---
+
+## 12. Suspension and Termination
+
+- You may stop using the Service at any time. Termination rights and any minimum term are as described in your plan or order form.
+- We may suspend or terminate your access for material breach, non-payment, or legal requirement. Suspension for security or abuse reasons will be proportionate to the risk and documented.
+- On termination, you may export your data during the export window stated in your plan. After that window, data is deleted according to the retention schedule in our Privacy Policy, subject to legal holds.
+- Any unpaid invoices remain due.
+
+---
+
+## 13. Disclaimers and Limitation of Liability
+
+[⚠️ **LEGAL REVIEW REQUIRED**]
+
+- The Service is provided "as is" and "as available". To the maximum extent permitted by law, we disclaim implied warranties of merchantability, fitness for a particular purpose, and non-infringement.
+- To the extent permitted by law, we are not liable for indirect, incidental, special, consequential, or punitive damages, or for loss of profits, data, goodwill, or business interruption.
+- Nothing in these Terms waives rights that cannot legally be waived, and nothing limits liability for fraud, gross negligence, or willful misconduct where such limitation is prohibited by law.
+
+---
+
+## 14. Governing Law and Disputes
+
+[⚠️ **LEGAL REVIEW REQUIRED**]
+
+These Terms are governed by the laws of the jurisdiction in which the Provider operates, without regard to its conflict of law provisions. The governing law, venue, and dispute process for the published terms will be confirmed with the operating entity before publication.
+
+---
+
+## 15. Changes to These Terms
+
+- We may update these Terms to reflect changes in the Service, the law, or our practices.
+- Material changes take effect at least 30 days after notice by email or in-app notice.
+- Non-material changes take effect when posted with an updated "Last updated" date.
+- If you disagree with a material change, you may contact us and stop using the Service. Continuing to use the Service after the notice period constitutes acceptance.
+
+---
+
+## 16. Contact Us
+
+If you have questions about these Terms, contact us at **shannashin2018@gmail.com**.
+
+---
+
+## Pre-Publication Checklist
 
 - [ ] Provider legal identity, address, and contact confirmed.
 - [ ] Pricing, billing, refund, support, and SLA terms approved.
-- [ ] Privacy notice and data-processing terms aligned.
+- [ ] Privacy policy and data-processing terms aligned.
 - [ ] AI and third-party integration disclaimers reviewed.
 - [ ] Liability, governing law, dispute, termination, and deletion clauses reviewed by counsel.
+- [ ] Governing law clause confirmed against the operating entity.
 - [ ] Actual product behavior matches every promise.
