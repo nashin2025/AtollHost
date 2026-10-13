@@ -20,6 +20,8 @@ export const paths = {
   integrations: '/integrations',
   team: '/team',
   settings: '/settings',
+  termsOfService: '/terms',
+  privacyPolicy: '/privacy',
 } as const;
 
 export type AppPath = (typeof paths)[keyof typeof paths];

@@ -14,8 +14,10 @@ import { FeaturePlaceholder } from './features/FeaturePlaceholder';
 import { InboxPage } from './features/inbox/InboxPage';
 import { OnboardingPage } from './features/onboarding/OnboardingPage';
 import { OverviewPage } from './features/overview/OverviewPage';
+import { PrivacyPolicyPage } from './features/legal/PrivacyPolicyPage';
 import { PropertiesPage } from './features/properties/PropertiesPage';
 import { ScannerPage } from './features/scanner/ScannerPage';
+import { TermsOfServicePage } from './features/legal/TermsOfServicePage';
 import { ToastProvider } from './components/ui/Toast';
 import { paths } from './router';
 
@@ -41,6 +43,8 @@ export function App() {
             />
             <Route path={paths.onboarding} element={<OnboardingPage />} />
             <Route path={paths.accessDenied} element={<AccessDeniedPage />} />
+            <Route path={paths.termsOfService} element={<TermsOfServicePage />} />
+            <Route path={paths.privacyPolicy} element={<PrivacyPolicyPage />} />
             <Route element={<ProtectedRoute />}>
               <Route element={<AppShell />}>
                 <Route index element={<OverviewPage />} />
