@@ -7,7 +7,7 @@ import { LoadingState } from '../../components/ui/States';
 import { Field } from '../../components/ui/Field';
 import { SelectField } from '../../components/ui/Field';
 import { Badge } from '../../components/ui/Badge';
-import { DataTable, type Column } from '../../components/ui/DataTable';
+import { Icon } from '../../components/ui/Icon';
 import { listMyMemberships, type Membership } from '../../lib/memberships';
 import {
   assignPropertyMember,
@@ -337,69 +337,6 @@ export function PropertiesPage() {
     }
   }
 
-  const columns: Column<Property>[] = [
-    {
-      key: 'name',
-      header: 'Property',
-      sortValue: (row) => row.name,
-      render: (row) => (
-        <div>
-          <p className="table-primary">{row.name}</p>
-          <p className="table-secondary">
-            {row.island}
-            {row.atoll ? `, ${row.atoll}` : ''}
-          </p>
-        </div>
-      ),
-    },
-    {
-      key: 'organization',
-      header: 'Organization',
-      sortValue: (row) => row.organization?.name ?? '',
-      render: (row) => row.organization?.name ?? '—',
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      sortValue: (row) => row.status,
-      render: (row) => (
-        <Badge status={row.status} tone={statusTone(row.status)} />
-      ),
-    },
-    {
-      key: 'team',
-      header: 'Team',
-      sortValue: (row) => (data.teamByProperty[row.id] ?? []).length,
-      render: (row) => String((data.teamByProperty[row.id] ?? []).length),
-    },
-    {
-      key: 'actions',
-      header: 'Actions',
-      render: (row) => (
-        <div className="table-actions">
-          {isAdminOf(row.organization_id) && row.status !== 'archived' && (
-            <>
-              <Button variant="outline" onClick={() => openEdit(row)}>
-                Edit
-              </Button>
-              <Button variant="outline" onClick={() => void openTeam(row)}>
-                Team
-              </Button>
-              <Button variant="ghost" onClick={() => openArchive(row)}>
-                Archive
-              </Button>
-            </>
-          )}
-          {row.status === 'archived' ? (
-            <span className="table-secondary">Archived</span>
-          ) : !isAdminOf(row.organization_id) ? (
-            <span className="table-secondary">Read only</span>
-          ) : null}
-        </div>
-      ),
-    },
-  ];
-
   const propertyDialog = dialog === 'create' || dialog === 'edit';
 
   return (
@@ -417,13 +354,82 @@ export function PropertiesPage() {
           <Button onClick={openCreate}>Add property</Button>
         )}
       </div>
-      <DataTable
-        columns={columns}
-        rows={data.properties}
-        rowKey={(row) => row.id}
-        emptyMessage="No properties yet. Create your first property to get started."
-        emptyAction={manageableOrgs.length > 0 ? <Button onClick={openCreate}>Add property</Button> : undefined}
-      />
+      {data.properties.length === 0 ? (
+        <EmptyState
+          title="No properties yet"
+          message="Create your first property to manage enquiries, conversations, tasks, and approvals in one place."
+          action={
+            manageableOrgs.length > 0 ? (
+              <Button onClick={openCreate}>Add property</Button>
+            ) : undefined
+          }
+        />
+      ) : (
+        <div className="property-grid">
+          {data.properties.map((property) => {
+            const teamCount = (data.teamByProperty[property.id] ?? []).length;
+            const admin = isAdminOf(property.organization_id);
+            const archived = property.status === 'archived';
+            return (
+              <article key={property.id} className="property-card">
+                <header className="property-card-header">
+                  <span className="property-card-icon">
+                    <Icon>
+                      <path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16" />
+                      <path d="M15 9h4a1 1 0 0 1 1 1v11" />
+                      <path d="M3 21h18" />
+                      <path d="M9 7h2" />
+                      <path d="M9 11h2" />
+                      <path d="M9 15h2" />
+                    </Icon>
+                  </span>
+                  <div className="property-card-title">
+                    <h2>{property.name}</h2>
+                    <p className="property-card-location">
+                      {property.island}
+                      {property.atoll ? `, ${property.atoll}` : ''}
+                    </p>
+                  </div>
+                  <Badge status={property.status} tone={statusTone(property.status)} />
+                </header>
+                <dl className="property-card-meta">
+                  {data.memberships.length > 1 && (
+                    <div>
+                      <dt>Organization</dt>
+                      <dd>{property.organization?.name ?? '—'}</dd>
+                    </div>
+                  )}
+                  <div>
+                    <dt>Team</dt>
+                    <dd>
+                      {teamCount} {teamCount === 1 ? 'member' : 'members'}
+                    </dd>
+                  </div>
+                </dl>
+                <footer className="property-card-actions">
+                  {admin && !archived ? (
+                    <>
+                      <Button variant="outline" onClick={() => openEdit(property)}>
+                        Edit
+                      </Button>
+                      <Button variant="outline" onClick={() => void openTeam(property)}>
+                        Team
+                      </Button>
+                      <Button variant="ghost" onClick={() => openArchive(property)}>
+                        Archive
+                      </Button>
+                    </>
+                  ) : archived ? (
+                    <span className="table-secondary">Archived</span>
+                  ) : (
+                    <span className="table-secondary">Read only</span>
+                  )}
+                </footer>
+              </article>
+            );
+          })}
+        </div>
+      )}
 
       <Dialog
         open={propertyDialog}

@@ -1,27 +1,12 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { Icon } from '../../components/ui/Icon';
 import { paths } from '../../router';
 
 interface Stat {
   title: string;
   context: string;
   icon: ReactNode;
-}
-
-function Icon({ children }: { children: ReactNode }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      {children}
-    </svg>
-  );
 }
 
 function StatCard({ title, context, icon }: Stat) {
