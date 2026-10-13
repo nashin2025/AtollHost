@@ -855,6 +855,8 @@ tbody tr:last-child td {
 
 .getting-started-link svg {
   flex-shrink: 0;
+  width: 18px;
+  height: 18px;
   color: var(--text-muted);
   transition: color 160ms ease-out;
 }
