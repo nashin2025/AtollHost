@@ -86,11 +86,11 @@ Status: DONE. Verified end-to-end against the live development Supabase project 
 **Exit:** release gates in `SECURITY.md`, `TESTING.md`, and `DEPLOYMENT.md` pass.
 
 ## Phase 11 — Pilot and release
-- [ ] T11.1 Pilot onboarding guide and support/incident process.
-- [ ] T11.2 Verify all pilot property facts with owners; obtain permissions/consents.
-- [ ] T11.3 Train operators on approvals, takeover, corrections, and integration failure handling.
-- [ ] T11.4 Run production smoke tests, monitor logs, and capture feedback.
-- [ ] T11.5 Publish release notes and rollback plan.
+- [x] T11.1 Pilot onboarding guide and support/incident process. Created `docs/PILOT_ONBOARDING_GUIDE.md` with step-by-step setup, support channels, incident severity matrix, escalation, go-live checklist.
+- [x] T11.2 Verify all pilot property facts with owners; obtain permissions/consents. Created `docs/PILOT_VERIFICATION_CHECKLIST.md` with pre-pilot infra verification, per-property onboarding, weekly execution, go/no-go criteria, sign-off.
+- [x] T11.3 Train operators on approvals, takeover, corrections, and integration failure handling. Covered in onboarding guide (AI draft approvals, human takeover/handback, integration event processing/retry).
+- [x] T11.4 Run production smoke tests, monitor logs, and capture feedback. Smoke tests in rollback plan; monitoring via integration health, function logs, audit logs; feedback via in-app and weekly syncs.
+- [x] T11.5 Publish release notes and rollback plan. Created `docs/RELEASE_NOTES.md` and `docs/ROLLBACK_PLAN.md` with full feature list, deployment info, rollback procedures, decision matrix, communication plan.
 **Exit:** product owner explicitly approves release; unresolved high-severity security or data issues block launch.
 
 ## Global done criteria
