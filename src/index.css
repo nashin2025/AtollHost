@@ -754,16 +754,34 @@ tbody tr:last-child td {
   padding: var(--space-4);
 }
 
-.stat-card h2 {
+.stat-card h3 {
   font-size: 13px;
   font-weight: 550;
   color: var(--text-muted);
-  margin-bottom: var(--space-2);
+  margin: 0 0 var(--space-2);
+}
+
+.stat-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin-bottom: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.stat-card-icon svg {
+  width: 18px;
+  height: 18px;
 }
 
 .stat-value {
   font-size: 28px;
   font-weight: 650;
+  color: var(--text-muted);
   margin: 0 0 var(--space-1);
 }
 
@@ -771,6 +789,78 @@ tbody tr:last-child td {
   font-size: 13px;
   color: var(--text-muted);
   margin: 0;
+}
+
+.overview-heading {
+  margin: 0 0 var(--space-4);
+}
+
+.overview-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-5);
+}
+
+.overview-panel h2 {
+  margin: 0 0 var(--space-2);
+}
+
+.overview-panel-intro {
+  color: var(--text-muted);
+  max-width: 72ch;
+  margin: 0 0 var(--space-4);
+}
+
+.getting-started-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.getting-started-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 160ms ease-out, background 160ms ease-out;
+}
+
+.getting-started-link:hover {
+  border-color: var(--primary);
+  background: var(--surface-muted);
+}
+
+.getting-started-link strong {
+  display: block;
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+
+.getting-started-detail {
+  display: block;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.getting-started-link svg {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: color 160ms ease-out;
+}
+
+.getting-started-link:hover svg {
+  color: var(--primary);
 }
 
 .feature-placeholder {
