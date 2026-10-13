@@ -6,6 +6,8 @@ import { isAuthConfigured } from '../../lib/config';
 import { supabase } from '../../lib/supabase';
 import { paths } from '../../router';
 
+type FieldName = 'email' | 'password' | 'confirmPassword';
+
 export function SignUpPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -14,11 +16,7 @@ export function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<{
-    email?: string;
-    password?: string;
-    confirmPassword?: string;
-  }>({});
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<FieldName, string>>>({});
   const [showCompleted, setShowCompleted] = useState(false);
   const [completedEmail, setCompletedEmail] = useState('');
 
@@ -89,7 +87,7 @@ export function SignUpPage() {
     return undefined;
   };
 
-  const validateField = (name: string, value: string): string | undefined => {
+  const validateField = (name: FieldName, value: string): string | undefined => {
     switch (name) {
       case 'email':
         return validateEmail(value);
@@ -102,12 +100,12 @@ export function SignUpPage() {
     }
   };
 
-  const handleBlur = (name: string, value: string) => {
+  const handleBlur = (name: FieldName, value: string) => {
     const error = validateField(name, value);
     setFieldErrors((prev) => ({ ...prev, [name]: error }));
   };
 
-  const clearFieldError = (name: string) => {
+  const clearFieldError = (name: FieldName) => {
     setFieldErrors((prev) => {
       const next = { ...prev };
       delete next[name];
@@ -248,7 +246,7 @@ export function SignUpPage() {
             error={fieldErrors.password}
             required
             placeholder="Min. 8 characters"
-            helperText="At least 8 characters with uppercase, lowercase, and number"
+            helper="At least 8 characters with uppercase, lowercase, and number"
           />
 
           <Field
