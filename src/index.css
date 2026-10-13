@@ -1303,6 +1303,22 @@ tbody tr:last-child td {
   background: var(--surface-muted);
 }
 
+.invite-result {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.invite-link {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
 .inbox-layout {
   display: grid;
   grid-template-columns: minmax(240px, 320px) 1fr;

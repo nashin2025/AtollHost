@@ -18,6 +18,7 @@ import { PrivacyPolicyPage } from './features/legal/PrivacyPolicyPage';
 import { PropertiesPage } from './features/properties/PropertiesPage';
 import { ScannerPage } from './features/scanner/ScannerPage';
 import { TasksPage } from './features/tasks/TasksPage';
+import { TeamPage } from './features/team/TeamPage';
 import { TermsOfServicePage } from './features/legal/TermsOfServicePage';
 import { ToastProvider } from './components/ui/Toast';
 import { paths } from './router';
@@ -120,16 +121,7 @@ export function App() {
                     />
                   }
                 />
-                <Route
-                  path={paths.team}
-                  element={
-                    <FeaturePlaceholder
-                      title="Team & Access"
-                      description="Members, invitations, roles, property assignments, and revocation."
-                      screenIds={['AG-TEAM', 'AG-INVITATIONS']}
-                    />
-                  }
-                />
+                <Route path={paths.team} element={<TeamPage />} />
                 <Route
                   path={paths.settings}
                   element={
