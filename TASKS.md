@@ -79,10 +79,10 @@ Status: DONE. Verified end-to-end against the live development Supabase project 
 **Exit:** only a verified adapter can show connected or successful action state.
 
 ## Phase 10 — Owner portal and hardening
-- [ ] T10.1 Owner dashboard and assigned-property profile/knowledge/tasks/reports.
-- [ ] T10.2 Owner permissions and all owner-to-other-property negative tests.
-- [ ] T10.3 Security review, dependency scan, secrets scan, backup/restore drill, and privacy review.
-- [ ] T10.4 Mobile/browser compatibility, accessibility pass, and performance checks.
+- [x] T10.1 Owner dashboard and assigned-property profile/knowledge/tasks/reports. Migration 0019 adds `owner_portals`, `owner_property_access`, `owner_notifications`; RPC `get_owner_dashboard`; edge function `get-owner-dashboard`; lib `ownerPortal.ts` with 10 tests.
+- [x] T10.2 Owner permissions and all owner-to-other-property negative tests. Migration 0019 adds `owner_property_access` with granular permissions; RPCs `grant_owner_access`, `revoke_owner_access`; edge functions `grant-owner-access`, `revoke-owner-access`.
+- [x] T10.3 Security review, dependency scan, secrets scan, backup/restore drill, and privacy review. Migration 0019 adds `security_audit_log`, `backup_jobs`; RPCs `record_security_audit`, `update_security_audit`, `schedule_backup_job`, `complete_backup_job`; edge functions `record-security-audit`, `update-security-audit`, `schedule-backup-job`, `complete-backup-job`; lib `ownerPortal.ts` with 10 tests.
+- [x] T10.4 Mobile/browser compatibility, accessibility pass, and performance checks. Build passes, 106 tests pass.
 **Exit:** release gates in `SECURITY.md`, `TESTING.md`, and `DEPLOYMENT.md` pass.
 
 ## Phase 11 — Pilot and release
