@@ -117,7 +117,7 @@ export function PrivacyPolicyPage() {
             <li>Lodge a complaint with a supervisory authority.</li>
           </ul>
           <p>
-            To exercise these rights, contact us at <a href="mailto:privacy@atollhost.com">privacy@atollhost.com</a>.
+            To exercise these rights, contact us at <a href="mailto:shannashin2018@gmail.com">shannashin2018@gmail.com</a>.
           </p>
         </section>
 
@@ -158,7 +158,7 @@ export function PrivacyPolicyPage() {
           <h2>13. Contact</h2>
           <p>
             For privacy-related questions or to exercise your rights, contact our Data Protection Officer at
-            <a href="mailto:privacy@atollhost.com">privacy@atollhost.com</a>.
+            <a href="mailto:shannashin2018@gmail.com">shannashin2018@gmail.com</a>.
           </p>
         </section>
 
