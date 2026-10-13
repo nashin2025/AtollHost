@@ -13,6 +13,7 @@ import { listProperties, type Property } from '../../lib/properties';
 import {
   listFindings,
   listScannerRuns,
+  normalizeTargetUrl,
   reviewFinding,
   startScannerRun,
   type Finding,
@@ -207,6 +208,13 @@ export function ScannerPage() {
       setError('Choose a property to scan.');
       return;
     }
+    const targetUrl = normalizeTargetUrl(form.targetUrl);
+    if (targetUrl === null) {
+      setError(
+        'Enter a full target address starting with https://, for example https://your-property.com.',
+      );
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -214,7 +222,7 @@ export function ScannerPage() {
         organization_id: property.organization_id,
         property_id: property.id,
         target_name: form.targetName,
-        target_url: form.targetUrl,
+        target_url: targetUrl,
       });
       setDialogOpen(false);
       await reload();
@@ -382,7 +390,7 @@ export function ScannerPage() {
             onChange={(event) =>
               setForm({ ...form, targetUrl: event.target.value })
             }
-            helper="Only https targets can be scanned."
+            helper="Only https targets can be scanned. Leave off the scheme and we add https:// for you."
             required
           />
           {error && (

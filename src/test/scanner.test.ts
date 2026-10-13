@@ -3,6 +3,7 @@ import type { SupabaseClient } from '../lib/supabase';
 import {
   listFindings,
   listScannerRuns,
+  normalizeTargetUrl,
   reviewFinding,
   startScannerRun,
 } from '../lib/scanner';
@@ -151,5 +152,36 @@ describe('reviewFinding', () => {
     expect(client.functions.invoke).toHaveBeenCalledWith('review-finding', {
       body: { finding_id: 'f1', status: 'approved' },
     });
+  });
+});
+
+describe('normalizeTargetUrl', () => {
+  it('prepends https:// to a bare domain', () => {
+    expect(normalizeTargetUrl('coral-lagoon.example.com')).toBe(
+      'https://coral-lagoon.example.com',
+    );
+  });
+
+  it('keeps an https URL intact and accepts a query without a path', () => {
+    expect(normalizeTargetUrl('https://example.com/rooms')).toBe(
+      'https://example.com/rooms',
+    );
+    expect(normalizeTargetUrl('https://example.com?ref=scan')).toBe(
+      'https://example.com?ref=scan',
+    );
+  });
+
+  it('accepts uppercase hosts and trims pasted whitespace', () => {
+    expect(normalizeTargetUrl('  HTTPS://Example.COM  ')).toBe(
+      'HTTPS://Example.COM',
+    );
+  });
+
+  it('rejects http://, empty input, and malformed addresses', () => {
+    expect(normalizeTargetUrl('http://example.com')).toBeNull();
+    expect(normalizeTargetUrl('   ')).toBeNull();
+    expect(normalizeTargetUrl('https://')).toBeNull();
+    expect(normalizeTargetUrl('ftp://example.com')).toBeNull();
+    expect(normalizeTargetUrl('not a url')).toBeNull();
   });
 });
