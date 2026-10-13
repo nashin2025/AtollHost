@@ -33,21 +33,6 @@ export function SignUpPage() {
       <main className="auth-page">
         <div className="auth-card">
           <div className="auth-brand">
-            <svg
-              className="brand-icon"
-              viewBox="0 0 32 32"
-              fill="none"
-              aria-hidden="true"
-            >
-              <circle cx="16" cy="16" r="16" fill="var(--primary)" />
-              <path
-                d="M10 16L14 20L22 12"
-                stroke="white"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
             <span className="brand-name">AtollHost</span>
           </div>
           <h1>Sign up</h1>
@@ -164,10 +149,6 @@ export function SignUpPage() {
       <main className="auth-page">
         <div className="auth-card">
           <div className="auth-brand">
-            <svg className="brand-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-              <circle cx="16" cy="16" r="16" fill="var(--success)" />
-              <path d="M10 16L14 20L22 12" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
             <span className="brand-name">AtollHost</span>
           </div>
           <h1>Check your email</h1>
@@ -194,21 +175,6 @@ export function SignUpPage() {
     <main className="auth-page">
       <div className="auth-card">
         <div className="auth-brand">
-          <svg
-            className="brand-icon"
-            viewBox="0 0 32 32"
-            fill="none"
-            aria-hidden="true"
-          >
-            <circle cx="16" cy="16" r="16" fill="var(--primary)" />
-            <path
-              d="M10 16L14 20L22 12"
-              stroke="white"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
           <span className="brand-name">AtollHost</span>
         </div>
         <header className="auth-header">
