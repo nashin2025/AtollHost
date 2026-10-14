@@ -24,9 +24,10 @@ import {
 import { supabase } from '../../lib/supabase';
 
 const taskStatuses = [
+  { value: 'backlog', label: 'Backlog' },
   { value: 'todo', label: 'To do' },
   { value: 'in_progress', label: 'In progress' },
-  { value: 'blocked', label: 'Blocked' },
+  { value: 'in_review', label: 'In review' },
   { value: 'done', label: 'Done' },
   { value: 'cancelled', label: 'Cancelled' },
 ];
@@ -39,9 +40,10 @@ const taskPriorities = [
 ];
 
 const statusTone: Record<string, 'success' | 'warning' | 'info' | 'neutral'> = {
+  backlog: 'neutral',
   todo: 'neutral',
   in_progress: 'info',
-  blocked: 'warning',
+  in_review: 'warning',
   done: 'success',
   cancelled: 'neutral',
 };

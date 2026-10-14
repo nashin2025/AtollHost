@@ -32,7 +32,7 @@ export async function loadOverviewStats(
     client
       .from('tasks')
       .select('*', { count: 'exact', head: true })
-      .in('status', ['todo', 'in_progress', 'blocked'])
+      .in('status', ['backlog', 'todo', 'in_progress', 'in_review'])
       .lt('due_at', nowIso),
     client
       .from('ai_drafts')
