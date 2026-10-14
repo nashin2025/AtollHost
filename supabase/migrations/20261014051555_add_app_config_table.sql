@@ -22,7 +22,7 @@ create policy "org members can read app_config"
     )
   );
 
--- Org admins/owners can update AI config
+-- Org admins/staff can update AI config
 create policy "org admins can update app_config"
   on app_config for update
   using (
@@ -30,12 +30,12 @@ create policy "org admins can update app_config"
       select organization_id
       from organization_members
       where user_id = auth.uid()
-      and role in ('owner', 'admin')
+      and role in ('agency_admin', 'agency_staff')
       and status = 'active'
     )
   );
 
--- Org admins/owners can insert AI config (first time setup)
+-- Org admins/staff can insert AI config (first time setup)
 create policy "org admins can insert app_config"
   on app_config for insert
   with check (
@@ -43,7 +43,7 @@ create policy "org admins can insert app_config"
       select organization_id
       from organization_members
       where user_id = auth.uid()
-      and role in ('owner', 'admin')
+      and role in ('agency_admin', 'agency_staff')
       and status = 'active'
     )
   );
@@ -52,4 +52,4 @@ create policy "org admins can insert app_config"
 create trigger app_config_updated_at
   before update on app_config
   for each row
-  execute function update_updated_at_column();
+  execute function public.set_updated_at();
