@@ -6,12 +6,16 @@ import { ErrorState } from '../../components/ui/States';
 import { LoadingState } from '../../components/ui/States';
 import { Field } from '../../components/ui/Field';
 import { SelectField } from '../../components/ui/Field';
+import { Switch } from '../../components/ui/Switch';
 import { listMyMemberships } from '../../lib/memberships';
 import {
   getMyProfile,
   listAuditLogs,
   updateMyProfile,
+  getAppConfig,
+  updateAppConfig,
   type AuditLogEntry,
+  type AppConfig,
 } from '../../lib/settings';
 import { listOrganizationMembers } from '../../lib/properties';
 import { supabase } from '../../lib/supabase';
@@ -45,6 +49,9 @@ export function SettingsPage() {
   const [search, setSearch] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [aiConfig, setAiConfig] = useState<AppConfig | null>(null);
+  const [aiSaving, setAiSaving] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   const hasAuth = supabase !== null;
 
@@ -98,12 +105,26 @@ export function SettingsPage() {
     }
   }, [selectedOrgId]);
 
+  const loadAiConfig = useCallback(async () => {
+    if (!supabase || selectedOrgId === '') {
+      setAiConfig(null);
+      return;
+    }
+    try {
+      const config = await getAppConfig(supabase, selectedOrgId);
+      setAiConfig(config);
+    } catch {
+      setAiConfig(null);
+    }
+  }, [selectedOrgId]);
+
   useEffect(() => {
     if (status !== 'ready' || selectedOrgId === '') {
       return;
     }
     void loadAudit();
-  }, [status, selectedOrgId, loadAudit]);
+    void loadAiConfig();
+  }, [status, selectedOrgId, loadAudit, loadAiConfig]);
 
   if (!hasAuth) {
     return (
@@ -171,6 +192,26 @@ export function SettingsPage() {
       setError(saveError instanceof Error ? saveError.message : null);
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleSaveAiConfig(event: FormEvent) {
+    event.preventDefault();
+    if (!supabase || !aiConfig || selectedOrgId === '') {
+      return;
+    }
+    setAiSaving(true);
+    setAiError(null);
+    try {
+      await updateAppConfig(supabase, selectedOrgId, {
+        ai_enabled: aiConfig.ai_enabled,
+        ai_model: aiConfig.ai_model ?? null,
+        ai_temperature: aiConfig.ai_temperature ?? null,
+      });
+    } catch (saveError) {
+      setAiError(saveError instanceof Error ? saveError.message : 'Failed to save AI settings');
+    } finally {
+      setAiSaving(false);
     }
   }
 
@@ -296,6 +337,69 @@ export function SettingsPage() {
         Organization details are read-only here. Contact support to change the
         name or slug.
       </p>
+
+      {selectedMembership && (selectedMembership.role === 'owner' || selectedMembership.role === 'admin') && (
+        <>
+          <h2 className="overview-heading">AI features</h2>
+          <p className="page-description">
+            Control AI-assisted draft generation for this organization. When disabled,
+            no drafts are generated and no data is sent to AI providers.
+          </p>
+          {aiConfig !== null && (
+            <form onSubmit={handleSaveAiConfig} noValidate>
+              <div className="field" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                <Switch
+                  checked={aiConfig.ai_enabled}
+                  onChange={(checked) => setAiConfig((prev) => prev ? { ...prev, ai_enabled: checked } : null)}
+                  disabled={aiSaving}
+                />
+                <div>
+                  <label className="field-label">Enable AI draft generation</label>
+                  <p className="field-helper">Allow AI to generate response drafts using verified Property Brain facts.</p>
+                </div>
+              </div>
+              {aiConfig.ai_enabled && (
+                <>
+                  <div className="field">
+                    <Field
+                      label="AI model"
+                      value={aiConfig.ai_model ?? ''}
+                      onChange={(e) => setAiConfig((prev) => prev ? { ...prev, ai_model: e.target.value } : null)}
+                      placeholder="e.g. gpt-4o, claude-3-sonnet"
+                      optional
+                    />
+                    <p className="field-helper">Leave blank to use the default model.</p>
+                  </div>
+                  <div className="field">
+                    <Field
+                      label="Temperature"
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="2"
+                      value={aiConfig.ai_temperature ?? ''}
+                      onChange={(e) => setAiConfig((prev) => prev ? { ...prev, ai_temperature: parseFloat(e.target.value) || null } : null)}
+                      placeholder="0.7"
+                      optional
+                    />
+                    <p className="field-helper">Controls randomness. Lower = more deterministic. Range: 0.0 – 2.0.</p>
+                  </div>
+                </>
+              )}
+              {aiError && <p className="auth-error" role="alert">{aiError}</p>}
+              <div className="dialog-actions">
+                <Button type="submit" loading={aiSaving} disabled={!aiConfig?.ai_enabled && aiConfig !== null}>
+                  Save AI settings
+                </Button>
+                {aiConfig !== null && !aiSaving && <span className="stat-context">Saved.</span>}
+              </div>
+            </form>
+          )}
+          {aiConfig === null && !aiSaving && (
+            <p className="stat-context">AI settings not configured yet. Save to create initial configuration.</p>
+          )}
+        </>
+      )}
 
       <h2 className="overview-heading">Audit log</h2>
       <div className="field">

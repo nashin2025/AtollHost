@@ -18,6 +18,47 @@ export interface AuditLogEntry {
   created_at: string;
 }
 
+export interface AppConfig {
+  org_id: string;
+  ai_enabled: boolean;
+  ai_model: string | null;
+  ai_temperature: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getAppConfig(
+  client: SupabaseClient,
+  organizationId: string,
+): Promise<AppConfig | null> {
+  const { data, error } = await client
+    .from('app_config')
+    .select('*')
+    .eq('org_id', organizationId)
+    .single();
+  if (error) {
+    if (error.code === 'PGRST116') return null;
+    throw new Error(error.message);
+  }
+  return data as AppConfig;
+}
+
+export async function updateAppConfig(
+  client: SupabaseClient,
+  organizationId: string,
+  updates: Partial<Pick<AppConfig, 'ai_enabled' | 'ai_model' | 'ai_temperature'>>,
+): Promise<AppConfig> {
+  const { data, error } = await client
+    .from('app_config')
+    .upsert({ org_id: organizationId, ...updates }, { onConflict: 'org_id' })
+    .select()
+    .single();
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data as AppConfig;
+}
+
 export async function getMyProfile(
   client: SupabaseClient,
 ): Promise<MyProfile | null> {
