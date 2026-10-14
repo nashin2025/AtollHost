@@ -112,7 +112,7 @@ useEffect(() => {
       setStatus('error');
       setError(err instanceof Error ? err.message : 'Failed to start scan');
     }
-  }, [supabase, data.propertyId, data.sources, data.scope, data.customUrls, data.deepScan]);
+  }, [supabase, data.propertyId, data.sources, data.scope, data.customUrls, data.deepScan, scanId]);
 
   if (!hasAuth) {
     return (
