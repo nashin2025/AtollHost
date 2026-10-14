@@ -1007,18 +1007,20 @@ NEXT PHASE:
 
 ## 26. Open decisions to confirm before production
 
--   Public self-registration or invitation-only accounts.
--   Exact agency/property staff permission matrix.
--   PMS used by the first pilot guesthouses.
--   First communication channel to integrate.
--   Whether all AI replies require approval during the pilot.
--   Scanner scoring formula and unavailable-source handling.
--   Retention/deletion policy for guest identity information.
--   Official tax/MGIS fields and submission protocol.
--   First required report exports.
--   Content scheduling scope.
--   Hosting/domain, backup frequency and recovery objectives.
--   Monitoring and AI usage budget limits.
+**Resolved** — see `docs/decisions/001-ui-spec-26-decisions.md`
+
+- ✅ Public self-registration or invitation-only accounts → **Invitation-only**
+- ✅ Exact agency/property staff permission matrix → **4-tier: Owner/Admin/Staff/Property Staff**
+- ✅ PMS used by the first pilot guesthouses → **Vayves + Fenuva (Cloudbeds stretch)**
+- ✅ First communication channel to integrate → **WhatsApp Business API**
+- ✅ Whether all AI replies require approval during the pilot → **Yes, all require approval (configurable via app_config)**
+- ✅ Scanner scoring formula and unavailable-source handling → **Evidence-based, transparent N/A handling**
+- ✅ Retention/deletion policy for guest identity information → **3yr ID docs / 7yr transactions**
+- ✅ Official tax/MGIS fields and submission protocol → **T-GST 16%, Green Tax $6, CSV export for accountant**
+- ✅ First required report exports → **Daily Ops, Monthly Performance, Tax Summary**
+- ✅ Content scheduling scope → **Manual scheduling; auto-publish when integration authorized**
+- ✅ Hosting/domain, backup frequency and recovery objectives → **Vercel/Supabase, 24h RPO, 4h RTO**
+- ✅ Monitoring and AI usage budget limits → **$500/mo/org, 80%/95% alerts**
 
 ## 27. End-to-end product workflow
 
