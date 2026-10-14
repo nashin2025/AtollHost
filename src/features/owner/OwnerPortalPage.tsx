@@ -369,7 +369,7 @@ export function OwnerPortalPage() {
           <SelectField
             label="Property"
             value={selectedId}
-            onChange={() => {}}
+            onChange={(e) => setSelectedId(e.target.value)}
           >
             {properties.map((property) => (
               <option key={property.property_id} value={property.property_id}>
