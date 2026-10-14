@@ -509,3 +509,4 @@ export function ScannerPage() {
     </section>
   );
 }
+export { ScannerSetupPage } from './ScannerSetupPage';

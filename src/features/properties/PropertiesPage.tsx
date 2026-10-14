@@ -150,6 +150,7 @@ export function PropertiesPage() {
             role: row.role,
             full_name: null,
             status: row.status,
+            granted_at: null,
           });
           teamByProperty[row.property_id] = existing;
         }
@@ -824,3 +825,6 @@ export function PropertiesPage() {
     </section>
   );
 }
+export { PropertyDetailPage } from './PropertyDetailPage';
+export { PropertyDetailPageWrapper } from './PropertyDetailPageWrapper';
+export { OnboardingChecklistPageWrapper } from './OnboardingChecklistPage';

@@ -89,6 +89,22 @@ export async function listTaskComments(
   return (data ?? []) as unknown as TaskComment[];
 }
 
+export async function getTask(
+  client: SupabaseClient,
+  taskId: string,
+): Promise<Task | null> {
+  const { data, error } = await client
+    .from('tasks')
+    .select('id, property_id, assigned_to, title, description, status, priority, due_at, source, comments_count, last_activity_at, created_at, updated_at')
+    .eq('id', taskId)
+    .single();
+  if (error) {
+    if (error.code === 'PGRST116') return null;
+    throw new Error(error.message);
+  }
+  return data as unknown as Task;
+}
+
 export async function addTaskComment(
   client: SupabaseClient,
   taskId: string,

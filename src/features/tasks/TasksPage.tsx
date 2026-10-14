@@ -612,3 +612,4 @@ export function TasksPage() {
     </section>
   );
 }
+export { TaskDetailPageWrapper } from './TaskDetailPage';

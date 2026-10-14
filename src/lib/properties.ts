@@ -19,6 +19,7 @@ export interface TeamMember {
   role: string;
   full_name: string | null;
   status: string;
+  granted_at: string | null;
 }
 
 export interface OrganizationMember {

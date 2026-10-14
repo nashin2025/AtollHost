@@ -333,3 +333,4 @@ export function JourneyPage() {
     </section>
   );
 }
+export { JourneyDetailPageWrapper } from './JourneyDetailPage';

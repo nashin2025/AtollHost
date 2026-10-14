@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 const { listOwnerPropertyAccess, getOwnerDashboard } = vi.hoisted(() => ({
@@ -13,6 +13,15 @@ vi.mock('../lib/supabase', () => ({
       getUser: () =>
         Promise.resolve({ data: { user: { id: 'user-1' } } }),
     },
+    from: () => ({
+      select: () => ({
+        eq: () => ({
+          eq: () => ({
+            limit: () => Promise.resolve({ data: [] }),
+          }),
+        }),
+      }),
+    }),
   },
 }));
 
@@ -21,7 +30,7 @@ vi.mock('../lib/ownerPortal', () => ({
   getOwnerDashboard: () => getOwnerDashboard(),
 }));
 
-import { OwnerPortalPage } from '../features/owner/OwnerPortalPage';
+import { OwnerPortalPage, OwnerWrapper } from '../features/owner/OwnerPortalPage';
 
 const dashboard = {
   property_name: 'Coral Lagoon Guesthouse',
@@ -35,8 +44,12 @@ const dashboard = {
 
 function renderPage() {
   return render(
-    <MemoryRouter>
-      <OwnerPortalPage />
+    <MemoryRouter initialEntries={['/owner']}>
+      <Routes>
+        <Route element={<OwnerWrapper />}>
+          <Route path="/owner" element={<OwnerPortalPage />} />
+        </Route>
+      </Routes>
     </MemoryRouter>,
   );
 }

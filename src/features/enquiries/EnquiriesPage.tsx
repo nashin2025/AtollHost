@@ -880,3 +880,4 @@ export function EnquiriesPage() {
     </section>
   );
 }
+export { EnquiryDetailPageWrapper } from './EnquiryDetailPage';

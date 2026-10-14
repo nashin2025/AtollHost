@@ -21,6 +21,8 @@ export interface ContentCalendar {
   updated_at: string;
 }
 
+export type ContentItem = ContentCalendar;
+
 export interface ContentForm {
   property_id: string;
   organization_id: string;
@@ -58,6 +60,13 @@ export async function createContent(
   return invokeFunction<{ content_id: string }>(client, 'create-content', form);
 }
 
+export async function createContentItem(
+  client: SupabaseClient,
+  form: ContentForm,
+): Promise<{ content_id: string }> {
+  return invokeFunction<{ content_id: string }>(client, 'create-content', form);
+}
+
 export async function listContent(
   client: SupabaseClient,
   propertyId: string,
@@ -79,6 +88,18 @@ export async function updateContentStatus(
   const { error } = await client
     .from('content_calendar')
     .update({ status, updated_at: new Date().toISOString() })
+    .eq('id', contentId);
+  if (error) throw new Error(error.message);
+}
+
+export async function updateContentItem(
+  client: SupabaseClient,
+  contentId: string,
+  updates: Partial<Omit<ContentForm, 'property_id' | 'organization_id'>>,
+): Promise<void> {
+  const { error } = await client
+    .from('content_calendar')
+    .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', contentId);
   if (error) throw new Error(error.message);
 }

@@ -461,3 +461,4 @@ export function ContentPage() {
     </section>
   );
 }
+export { ContentEditorPageWrapper } from './ContentEditorPage';

@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react';
+import { createContext, useContext, type ReactNode } from 'react';
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { Icon } from '../../components/ui/Icon';
 import { EmptyState } from '../../components/ui/States';
@@ -9,6 +9,23 @@ import { LoadingState } from '../../components/ui/States';
 import { SelectField } from '../../components/ui/Field';
 import { getOwnerDashboard, listOwnerPropertyAccess } from '../../lib/ownerPortal';
 import { supabase } from '../../lib/supabase';
+import { paths } from '../../router';
+
+interface OwnerContextValue {
+  allowedPropertyIds: string[];
+  properties: OwnerPropertyView[];
+  selectedId: string;
+}
+
+const OwnerContext = createContext<OwnerContextValue>({
+  allowedPropertyIds: [],
+  properties: [],
+  selectedId: '',
+});
+
+export function useOwnerContext(): OwnerContextValue {
+  return useContext(OwnerContext);
+}
 
 interface OwnerPropertyView {
   property_id: string;
@@ -34,20 +51,31 @@ interface MetricCard {
   value: string;
   context: string;
   icon: ReactNode;
+  link?: string;
 }
 
-function MetricCard({ title, value, context, icon }: MetricCard) {
+function MetricCard({ title, value, context, icon, link }: MetricCard) {
   return (
-    <div className="stat-card">
+    <a href={link} className="stat-card" style={{ textDecoration: 'none', color: 'inherit' }}>
       <span className="stat-card-icon">{icon}</span>
       <h3>{title}</h3>
       <p className="stat-value">{value}</p>
       <p className="stat-context">{context}</p>
-    </div>
+    </a>
   );
 }
 
-export function OwnerPortalPage() {
+const NAV_ITEMS: { label: string; path: string; icon: ReactNode }[] = [
+  { label: 'Dashboard', path: paths.owner, icon: <Icon><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></Icon> },
+  { label: 'Enquiries', path: paths.ownerEnquiries, icon: <Icon><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></Icon> },
+  { label: 'Inbox', path: paths.ownerInbox, icon: <Icon><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></Icon> },
+  { label: 'Tasks', path: paths.ownerTasks, icon: <Icon><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /><path d="M13 6h8" /><path d="M13 12h8" /><path d="M13 18h8" /></Icon> },
+  { label: 'Reviews', path: paths.ownerReviews, icon: <Icon><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></Icon> },
+  { label: 'Content', path: paths.ownerContent, icon: <Icon><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></Icon> },
+  { label: 'Reports', path: paths.ownerReports, icon: <Icon><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></Icon> },
+];
+
+function OwnerLayout() {
   const navigate = useNavigate();
   const [status, setStatus] = useState<'loading' | 'error' | 'ready'>('loading');
   const [properties, setProperties] = useState<OwnerPropertyView[]>([]);
@@ -111,6 +139,15 @@ export function OwnerPortalPage() {
     }
   }, [hasAuth, reload]);
 
+  async function handleSignOut() {
+    if (!supabase) {
+      return;
+    }
+    setSigningOut(true);
+    await supabase.auth.signOut();
+    navigate('/sign-in', { replace: true });
+  }
+
   if (!hasAuth) {
     return (
       <section aria-labelledby="owner-heading">
@@ -144,6 +181,51 @@ export function OwnerPortalPage() {
     );
   }
 
+  if (properties.length === 0) {
+    return (
+      <section aria-labelledby="owner-heading">
+        <div className="page-header">
+          <div>
+            <h1 id="owner-heading">Owner portal</h1>
+            <p className="page-description">
+              A read-only view of the properties you own, with only the metrics
+              your agency has shared with you.
+            </p>
+          </div>
+          <Button variant="secondary" loading={signingOut} onClick={() => void handleSignOut()}>
+            Sign out
+          </Button>
+        </div>
+        <EmptyState
+          title="No properties shared with you yet"
+          message="Your agency grants owner access from their workspace. Once they do, your property appears here."
+        />
+      </section>
+    );
+  }
+
+  return (
+    <OwnerContext.Provider
+      value={{
+        allowedPropertyIds: properties.map((p) => p.property_id),
+        properties,
+        selectedId,
+      }}
+    >
+      <Outlet />
+    </OwnerContext.Provider>
+  );
+}
+
+export function OwnerWrapper() {
+  return <OwnerLayout />;
+}
+
+export function OwnerPortalPage() {
+  const { properties, selectedId } = useOwnerContext();
+  const [signingOut, setSigningOut] = useState(false);
+  const navigate = useNavigate();
+
   const selected =
     properties.find((row) => row.property_id === selectedId) ?? null;
 
@@ -169,6 +251,7 @@ export function OwnerPortalPage() {
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </Icon>
             ),
+            link: paths.ownerEnquiries,
           },
           selected.permissions.revenue
             ? {
@@ -211,6 +294,7 @@ export function OwnerPortalPage() {
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                   </Icon>
                 ),
+                link: paths.ownerReviews,
               }
             : null,
           selected.permissions.tasks
@@ -227,6 +311,7 @@ export function OwnerPortalPage() {
                     <path d="M13 18h8" />
                   </Icon>
                 ),
+                link: paths.ownerTasks,
               }
             : null,
           selected.permissions.knowledge
@@ -239,6 +324,23 @@ export function OwnerPortalPage() {
                     <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
                   </Icon>
                 ),
+              }
+            : null,
+          selected.permissions.reports
+            ? {
+                title: 'Reports',
+                value: 'Available',
+                context: 'Run property-specific reports',
+                icon: (
+                  <Icon>
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                  </Icon>
+                ),
+                link: paths.ownerReports,
               }
             : null,
         ];
@@ -262,41 +364,58 @@ export function OwnerPortalPage() {
         </Button>
       </div>
 
-      {properties.length === 0 ? (
-        <EmptyState
-          title="No properties shared with you yet"
-          message="Your agency grants owner access from their workspace. Once they do, your property appears here."
-        />
-      ) : (
-        <>
-          {properties.length > 1 && (
-            <div className="field">
-              <SelectField
-                label="Property"
-                value={selectedId}
-                onChange={(event) => setSelectedId(event.target.value)}
-              >
-                {properties.map((property) => (
-                  <option key={property.property_id} value={property.property_id}>
-                    {property.name}
-                  </option>
-                ))}
-              </SelectField>
-            </div>
-          )}
+      {properties.length > 1 && (
+        <div className="field">
+          <SelectField
+            label="Property"
+            value={selectedId}
+            onChange={() => {}}
+          >
+            {properties.map((property) => (
+              <option key={property.property_id} value={property.property_id}>
+                {property.name}
+              </option>
+            ))}
+          </SelectField>
+        </div>
+      )}
 
-          {selected && (
-            <>
-              <h2 className="overview-heading">{selected.name}</h2>
-              <div className="stat-grid">
-                {visibleCards.map((card) => (
-                  <MetricCard key={card.title} {...card} />
-                ))}
-              </div>
-            </>
-          )}
+      <nav className="owner-nav" aria-label="Owner portal navigation" style={{ marginBottom: 'var(--space-6)', display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
+        {NAV_ITEMS.map((item) => (
+          <Link
+            key={item.label}
+            to={item.path}
+            className="btn btn-outline"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)' }}
+          >
+            {item.icon}
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+
+      {selected && (
+        <>
+          <h2 className="overview-heading">{selected.name}</h2>
+          <div className="stat-grid">
+            {visibleCards.map((card) => (
+              <MetricCard key={card.title} {...card} />
+            ))}
+          </div>
         </>
       )}
     </section>
   );
 }
+
+export { OwnerGuestPage } from './OwnerGuestPage';
+export { OwnerGuestDetailPageWrapper } from './OwnerGuestDetailPage';
+export { OwnerReservationPage } from './OwnerReservationPage';
+export { OwnerReservationDetailPageWrapper } from './OwnerReservationDetailPage';
+export { OwnerJourneyPage } from './OwnerJourneyPage';
+export { OwnerBrainPage } from './OwnerBrainPage';
+export { OwnerKnowledgeApprovalPage } from './OwnerKnowledgeApprovalPage';
+export { OwnerPropertyPage } from './OwnerPropertyPage';
+export { OwnerPropertySettingsPageWrapper } from './OwnerPropertySettingsPage';
+export { OwnerIntegrationsPage } from './OwnerIntegrationsPage';
+export { OwnerTeamPage } from './OwnerTeamPage';
