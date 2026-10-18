@@ -24,7 +24,7 @@ import { OwnerTasksPage } from './features/owner/OwnerTasksPage';
 import { OwnerReviewsPage } from './features/owner/OwnerReviewsPage';
 import { OwnerContentPage } from './features/owner/OwnerContentPage';
 import { OwnerReportsPage } from './features/owner/OwnerReportsPage';
-import { OverviewPage } from './features/overview/OverviewPage';
+import { DashboardPage } from './features/overview/DashboardPage';
 import { PrivacyPolicyPage } from './features/legal/PrivacyPolicyPage';
 import { PropertiesPage, PropertyDetailPageWrapper, OnboardingChecklistPageWrapper } from './features/properties/PropertiesPage';
 import { ReportsPage } from './features/reports/ReportsPage';
@@ -65,7 +65,7 @@ export function App() {
             <Route path={paths.privacyPolicy} element={<PrivacyPolicyPage />} />
             <Route element={<ProtectedRoute />}>
               <Route element={<AppShell />}>
-                <Route index element={<OverviewPage />} />
+                <Route index element={<DashboardPage />} />
                 <Route
                   path={paths.properties}
                   element={<PropertiesPage />}

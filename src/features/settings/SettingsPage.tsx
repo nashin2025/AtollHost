@@ -349,8 +349,20 @@ export function SettingsPage() {
             <form onSubmit={handleSaveAiConfig} noValidate>
               <div className="field" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
                 <Switch
-                  checked={aiConfig.ai_enabled}
-                  onChange={(checked) => setAiConfig((prev) => prev ? { ...prev, ai_enabled: checked } : null)}
+                  checked={aiConfig?.ai_enabled ?? false}
+                  onChange={(checked) =>
+                    setAiConfig((prev) =>
+                      prev
+                        ? { ...prev, ai_enabled: checked }
+                        : {
+                            ai_enabled: checked,
+                            ai_model: null,
+                            ai_temperature: null,
+                            created_at: '',
+                            updated_at: '',
+                            org_id: selectedOrgId,
+                          }
+                    )}
                   disabled={aiSaving}
                 />
                 <div>

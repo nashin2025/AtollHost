@@ -22,7 +22,7 @@ export class ErrorBoundary extends Component<Props, State> {
   render(): ReactNode {
     if (this.state.hasError) {
       return (
-        <main role="alert" className="error-boundary">
+        <main role="alert" className="af-card af-card--body error-boundary" style={{ maxWidth: 480, margin: 'var(--space-6) auto' }}>
           <h1>Something went wrong</h1>
           <p>
             This screen hit an unexpected error. Reload the page, and if the
@@ -30,7 +30,7 @@ export class ErrorBoundary extends Component<Props, State> {
           </p>
           <button
             type="button"
-            className="btn btn-primary"
+            className="af-btn af-btn--primary"
             onClick={() => this.setState({ hasError: false })}
           >
             Try again

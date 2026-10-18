@@ -1,4 +1,6 @@
 import { useMemo, useState, type ReactNode } from 'react';
+import { Button } from './Button';
+import { Skeleton } from './Skeleton';
 
 export interface Column<T> {
   key: string;
@@ -15,6 +17,7 @@ interface Props<T> {
   emptyMessage: string;
   emptyAction?: ReactNode;
   pageSize?: number;
+  caption?: string;
 }
 
 export function DataTable<T>({
@@ -25,6 +28,7 @@ export function DataTable<T>({
   emptyMessage,
   emptyAction,
   pageSize = 20,
+  caption,
 }: Props<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
@@ -67,28 +71,30 @@ export function DataTable<T>({
 
   if (loading) {
     return (
-      <div className="state-loading" role="status">
-        <span className="sr-only">Loading table</span>
-        <span className="skeleton skeleton-line" aria-hidden="true" />
-        <span className="skeleton skeleton-line" aria-hidden="true" />
-        <span className="skeleton skeleton-line" aria-hidden="true" />
+      <div className="af-card" role="status" aria-label="Loading table">
+        <div className="af-card__body">
+          <Skeleton variant="text" lines={3} />
+        </div>
       </div>
     );
   }
 
   if (rows.length === 0) {
     return (
-      <div className="state-empty">
-        <h3>No results</h3>
-        <p>{emptyMessage}</p>
-        {emptyAction}
+      <div className="af-empty-state af-table-empty" role="status" aria-label="No results">
+        <h3 className="af-empty-state__title">No results</h3>
+        <p className="af-empty-state__description">{emptyMessage}</p>
+        {emptyAction && (
+          <div className="af-empty-state__action">{emptyAction}</div>
+        )}
       </div>
     );
   }
 
   return (
-    <div className="table-wrap">
-      <table>
+    <div className="af-card">
+      {caption && <caption>{caption}</caption>}
+      <table className="af-table" role="grid" aria-rowcount={sorted.length}>
         <thead>
           <tr>
             {columns.map((column) => (
@@ -96,7 +102,7 @@ export function DataTable<T>({
                 {column.sortValue ? (
                   <button
                     type="button"
-                    className="table-sort"
+                    className="af-table__sort"
                     onClick={() => toggleSort(column.key)}
                     aria-sort={
                       sortKey === column.key
@@ -107,7 +113,7 @@ export function DataTable<T>({
                     }
                   >
                     {column.header}
-                    <span aria-hidden="true" className="table-sort-indicator">
+                    <span className="af-table__sort-indicator" aria-hidden="true">
                       {sortKey === column.key
                         ? sortDir === 'asc'
                           ? ' ↑'
@@ -132,31 +138,31 @@ export function DataTable<T>({
           ))}
         </tbody>
       </table>
-      <div className="table-pagination">
-        <p>
-          Page {currentPage + 1} of {pageCount}
-        </p>
-        <div className="table-pagination-actions">
-          <button
-            type="button"
-            className="btn btn-outline"
-            onClick={() => setPage((value) => Math.max(0, value - 1))}
-            disabled={currentPage === 0}
-          >
-            Previous
-          </button>
-          <button
-            type="button"
-            className="btn btn-outline"
-            onClick={() =>
-              setPage((value) => Math.min(pageCount - 1, value + 1))
-            }
-            disabled={currentPage >= pageCount - 1}
-          >
-            Next
-          </button>
+      {pageCount > 1 && (
+        <div className="af-card__footer">
+          <p>Page {currentPage + 1} of {pageCount}</p>
+          <div className="af-table__pagination">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((value) => Math.max(0, value - 1))}
+              disabled={currentPage === 0}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setPage((value) => Math.min(pageCount - 1, value + 1))
+              }
+              disabled={currentPage >= pageCount - 1}
+            >
+              Next
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

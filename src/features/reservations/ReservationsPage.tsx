@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button } from '../../components/ui/Button';
+import { Badge } from '../../components/ui/Badge';
 import { Dialog } from '../../components/ui/Dialog';
 import { Field } from '../../components/ui/Field';
 import { ErrorState, EmptyState, LoadingState } from '../../components/ui/States';
@@ -187,7 +188,7 @@ export function ReservationsPage({ propertyId, allowedPropertyIds }: Props) {
                   <td>{new Date(r.check_out).toLocaleDateString()}</td>
                   <td>{r.adults} adults, {r.children} children</td>
                   <td>{r.source}</td>
-                  <td><span className={`badge badge-${r.status}`}>{r.status}</span></td>
+                  <td><Badge status={r.status} tone={r.status === 'confirmed' ? 'success' : r.status === 'cancelled' ? 'danger' : 'warning'} /></td>
                   <td>{r.total_amount ? `${r.currency} ${r.total_amount.toLocaleString()}` : '—'}</td>
                   <td>
                     <Button variant="ghost" onClick={() => openEdit(r)}>Edit</Button>

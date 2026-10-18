@@ -50,7 +50,7 @@ export function Dialog({ open, title, onClose, children, describedBy }: Props) {
 
   return (
     <div
-      className="dialog-overlay"
+      className="af-dialog-overlay"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
           onClose();
@@ -63,13 +63,13 @@ export function Dialog({ open, title, onClose, children, describedBy }: Props) {
         aria-modal="true"
         aria-label={title}
         aria-describedby={describedBy}
-        className="dialog"
+        className="af-dialog"
       >
-        <div className="dialog-header">
+        <div className="af-dialog__header">
           <h2>{title}</h2>
           <button
             type="button"
-            className="btn btn-ghost btn-icon"
+            className="af-btn af-btn--ghost af-btn--icon-only af-btn--sm"
             onClick={onClose}
             aria-label="Close dialog"
           >
@@ -83,7 +83,7 @@ export function Dialog({ open, title, onClose, children, describedBy }: Props) {
             </svg>
           </button>
         </div>
-        <div className="dialog-body">{children}</div>
+        <div className="af-dialog__body">{children}</div>
       </div>
     </div>
   );

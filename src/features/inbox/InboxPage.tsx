@@ -421,26 +421,12 @@ export function InboxPage() {
       return;
     }
     const draft = aiDraftDialog.draft as GenerateAiDraftResult;
-    const newBody = prompt('Edit draft:', draft.draft_body);
-    if (newBody === null || newBody.trim() === '' || newBody === draft.draft_body) {
-      return;
-    }
-    setAiDraftDialog((prev) => ({ ...prev, loading: true, error: null }));
-    try {
-      // Note: edit_ai_draft RPC exists but not yet exposed in lib.
-      // For MVP, we re-generate with a note that manual edits require regeneration.
-      setAiDraftDialog((prev) => ({
-        ...prev,
-        loading: false,
-        error: 'Manual edit requires regeneration. Use the edited text as context for a new draft.',
-      }));
-    } catch (editError) {
-      setAiDraftDialog((prev) => ({
-        ...prev,
-        loading: false,
-        error: editError instanceof Error ? editError.message : 'Failed to edit draft',
-      }));
-    }
+    // Copy the draft body into the compose box so the operator can edit it
+    // as a human reply before sending. The AI draft itself is not modified;
+    // it must be approved or rejected through the approval flow.
+    setCompose(draft.draft_body);
+    setAiDraftDialog({ open: false, draft: null, loading: false, error: null });
+    setSelectedConversationId(selectedConversation?.id ?? '');
   }
 
   return (
@@ -621,7 +607,7 @@ export function InboxPage() {
                             )}
                             <div className="dialog-actions">
                               <label
-                                className="btn btn-outline"
+                                className="af-btn af-btn--outline af-btn--sm"
                                 style={{
                                   cursor: 'pointer',
                                 }}
@@ -654,12 +640,12 @@ export function InboxPage() {
                       className="compose-box"
                       onSubmit={(event) => void handleSend(event)}
                     >
-                      <label className="field" htmlFor="compose-body">
-                        <span>
+                      <label className="af-field" htmlFor="compose-body">
+                        <span className="af-field__label">
                           Reply{' '}
                           <span
                             aria-hidden="true"
-                            className="field-required"
+                            className="af-field__required"
                           >
                             *
                           </span>
@@ -813,7 +799,7 @@ export function InboxPage() {
       >
         <p id="ai-draft-description">
           Review the AI-generated draft. Approve to send as an AI message,
-          reject to discard, or edit to regenerate with changes.
+          reject to discard, or copy to compose to edit as a human reply.
         </p>
         {aiDraftDialog.loading && (
           <div className="dialog-loading">
@@ -891,7 +877,7 @@ export function InboxPage() {
                 disabled={aiDraftDialog.loading}
                 onClick={() => void handleEditAiDraft()}
               >
-                Edit
+                Copy to compose
               </Button>
               <Button
                 variant="outline"

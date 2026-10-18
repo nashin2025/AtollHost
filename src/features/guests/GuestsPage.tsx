@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { Dialog } from '../../components/ui/Dialog';
 import { Field } from '../../components/ui/Field';
@@ -116,7 +117,7 @@ export function GuestsPage({ propertyId, allowedPropertyIds }: Props) {
       <EmptyState
         title="No property selected"
         message="Select a property to view its guests."
-        action={<Button onClick={() => window.location.href = paths.properties}>Go to properties</Button>}
+        action={<Link to={paths.properties}><Button>Go to properties</Button></Link>}
       />
     );
   }

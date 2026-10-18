@@ -1,67 +1,66 @@
-import { forwardRef, type HTMLAttributes } from 'react';
+import { type HTMLAttributes, forwardRef } from 'react';
 
-type BadgeVariant = 'default' | 'secondary' | 'success' | 'warning' | 'danger' | 'info' | 'outline';
+export type BadgeVariant = 'default' | 'success' | 'warning' | 'danger' | 'info' | 'outline';
+export type BadgeSize = 'sm' | 'md' | 'lg';
+export type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
 
-const variantStyles: Record<BadgeVariant, { bg: string; color: string; border: string }> = {
-  default: { bg: 'var(--color-primary)', color: 'var(--color-primary-contrast)', border: 'none' },
-  secondary: { bg: 'var(--color-gray-200)', color: 'var(--color-gray-800)', border: 'none' },
-  success: { bg: 'var(--color-green-100)', color: 'var(--color-green-800)', border: 'none' },
-  warning: { bg: 'var(--color-yellow-100)', color: 'var(--color-yellow-800)', border: 'none' },
-  danger: { bg: 'var(--color-red-100)', color: 'var(--color-red-800)', border: 'none' },
-  info: { bg: 'var(--color-blue-100)', color: 'var(--color-blue-800)', border: 'none' },
-  outline: { bg: 'transparent', color: 'var(--color-text)', border: '1px solid var(--color-border)' },
-};
-
-// Legacy tone mapping for backward compatibility
-const toneToVariant: Record<string, BadgeVariant> = {
-  neutral: 'secondary',
+const toneToVariant: Record<BadgeTone, BadgeVariant> = {
+  neutral: 'default',
   success: 'success',
   warning: 'warning',
   danger: 'danger',
   info: 'info',
 };
 
-interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
+export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   variant?: BadgeVariant;
-  size?: 'sm' | 'md' | 'lg';
+  size?: BadgeSize;
+  dot?: boolean;
   // Legacy props for backward compatibility
   status?: string;
-  tone?: 'neutral' | 'success' | 'warning' | 'danger' | 'info';
+  tone?: BadgeTone;
 }
 
 export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
-  ({ className = '', variant = 'default', size = 'md', children, style, status, tone, ...props }, ref) => {
+  (
+    {
+      variant = 'default',
+      size = 'md',
+      dot = false,
+      className = '',
+      children,
+      style,
+      status,
+      tone,
+      ...props
+    }: BadgeProps,
+    ref
+  ) => {
     // Support legacy API: <Badge status="verified" tone="success" />
     const resolvedVariant = status && tone ? toneToVariant[tone] : variant;
 
-    const styles = variantStyles[resolvedVariant];
-    const sizeStyles = {
-      sm: { padding: '2px 6px', fontSize: 'var(--font-size-xs)', borderRadius: 'var(--radius-sm)' },
-      md: { padding: '4px 8px', fontSize: 'var(--font-size-sm)', borderRadius: 'var(--radius-md)' },
-      lg: { padding: '6px 12px', fontSize: 'var(--font-size-base)', borderRadius: 'var(--radius-lg)' },
-    }[size];
+    const baseClasses = [
+      'af-badge',
+      `af-badge--${resolvedVariant}`,
+      `af-badge--${size}`,
+      dot && 'af-badge--dot',
+      className,
+    ]
+      .filter(Boolean)
+      .join(' ');
 
     return (
       <span
         ref={ref}
-        className={`badge ${className}`.trim()}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          fontWeight: 500,
-          whiteSpace: 'nowrap',
-          backgroundColor: styles.bg,
-          color: styles.color,
-          border: styles.border,
-          ...sizeStyles,
-          ...style,
-        }}
+        className={baseClasses}
+        style={style}
         {...props}
       >
+        {dot && <span className="af-badge__dot" aria-hidden="true" />}
         {children ?? status}
       </span>
     );
-  },
+  }
 );
 
 Badge.displayName = 'Badge';

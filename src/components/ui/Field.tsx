@@ -11,6 +11,7 @@ interface Props
   helper?: string;
   error?: string;
   optional?: boolean;
+  className?: string;
 }
 
 export function Field({
@@ -31,33 +32,34 @@ export function Field({
 
   return (
     <div
-      className={['field', error ? 'field-invalid' : '', className]
+      className={['af-field', error ? 'af-field--error' : '', className]
         .filter(Boolean)
         .join(' ')}
     >
-      <label htmlFor={id}>
-        {label}{' '}
+      <label htmlFor={id} className="af-field__label">
+        {label}
         {optional ? (
-          <span className="field-optional">(optional)</span>
+          <span className="af-field__optional">(optional)</span>
         ) : (
           <>
-            <span aria-hidden="true" className="field-required">
-              *
-            </span>
+            <span aria-hidden="true" className="af-field__required">*</span>
             <span className="sr-only"> (required)</span>
           </>
         )}
       </label>
       <input
         id={id}
+        className="af-input"
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
         aria-required={!optional}
         {...rest}
       />
-      {helper && !error && <p id={`${id}-helper`} className="field-helper">{helper}</p>}
+      {helper && !error && (
+        <p id={`${id}-helper`} className="af-field__hint">{helper}</p>
+      )}
       {error && (
-        <p id={`${id}-error`} className="field-error-text" role="alert">
+        <p id={`${id}-error`} className="af-field__error" role="alert">
           {error}
         </p>
       )}
@@ -71,6 +73,7 @@ interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'id'
   error?: string;
   optional?: boolean;
   children: ReactNode;
+  className?: string;
 }
 
 export function SelectField({
@@ -79,6 +82,7 @@ export function SelectField({
   error,
   optional = false,
   children,
+  className = '',
   ...rest
 }: SelectProps) {
   const id = useId();
@@ -91,35 +95,43 @@ export function SelectField({
 
   return (
     <div
-      className={['field', error ? 'field-invalid' : '', '']
+      className={['af-field', error ? 'af-field--error' : '', className]
         .filter(Boolean)
         .join(' ')}
     >
-      <label htmlFor={id}>
-        {label}{' '}
+      <label htmlFor={id} className="af-field__label">
+        {label}
         {optional ? (
-          <span className="field-optional">(optional)</span>
+          <span className="af-field__optional">(optional)</span>
         ) : (
           <>
-            <span aria-hidden="true" className="field-required">
-              *
-            </span>
+            <span aria-hidden="true" className="af-field__required">*</span>
             <span className="sr-only"> (required)</span>
           </>
         )}
       </label>
-      <select
-        id={id}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy}
-        aria-required={!optional}
-        {...rest}
-      >
-        {children}
-      </select>
-      {helper && !error && <p id={`${id}-helper`} className="field-helper">{helper}</p>}
+      <div className="af-field__select-wrapper">
+        <select
+          id={id}
+          className="af-select"
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
+          aria-required={!optional}
+          {...rest}
+        >
+          {children}
+        </select>
+        <span className="af-select__icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M5 7l5 5 5-5" />
+          </svg>
+        </span>
+      </div>
+      {helper && !error && (
+        <p id={`${id}-helper`} className="af-field__hint">{helper}</p>
+      )}
       {error && (
-        <p id={`${id}-error`} className="field-error-text" role="alert">
+        <p id={`${id}-error`} className="af-field__error" role="alert">
           {error}
         </p>
       )}
