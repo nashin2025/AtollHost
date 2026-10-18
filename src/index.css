@@ -188,10 +188,11 @@ img, picture, video, canvas, svg, iframe, object, embed {
    CONTAINER QUERIES (component-level responsiveness)
    ========================================== */
 
-/* Card containers adapt to their parent width, not viewport */
-.af-card {
-  container-type: inline-size;
-  container-name: card;
+  /* Card containers adapt to their parent width, not viewport */
+  .af-card {
+    min-width: 0;
+    container-type: inline-size;
+    container-name: card;
 }
 
 @container card (min-width: 420px) {
@@ -2055,7 +2056,7 @@ pre code { background: none; border: none; padding: 0; font-size: inherit; }
 
 .af-page__actions { flex-shrink: 0; display: flex; flex-wrap: wrap; gap: var(--space-3); }
 
-.af-page__content { flex: 1; width: 100%; animation: af-fade-in var(--duration-nav) var(--ease-out) 50ms both; }
+.af-page__content { flex: 1; width: 100%; overflow-y: auto; animation: af-fade-in var(--duration-nav) var(--ease-out) 50ms both; }
 
 /* ==========================================
    RESPONSIVE STYLES
