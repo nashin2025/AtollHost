@@ -1264,7 +1264,12 @@ pre code { background: none; border: none; padding: 0; font-size: inherit; }
   }
 }
 
-.af-dashboard-grid > section:last-child {
+  .af-dashboard-grid > section {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .af-dashboard-grid > section:last-child {
   grid-column: span 2;
 }
 
